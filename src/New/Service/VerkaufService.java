@@ -19,13 +19,11 @@ import New.Objekte.Zahlung;
 
 public class VerkaufService extends BaseService {
 
-	private SucheService sucheService;
 	private Map<Integer, Integer> warenkorb;
 	private VerkaufManager verkaufManager;
 
 	public VerkaufService(Connection connection, Scanner scanner) {
 		super(connection, scanner);
-		this.sucheService = new SucheService(connection, scanner);
 		this.warenkorb = new HashMap<>();
 		try {
 			this.verkaufManager = new VerkaufManager();
@@ -38,25 +36,16 @@ public class VerkaufService extends BaseService {
 		boolean zurueck = false;
 		while (!zurueck) {
 			System.out.println("==== Verkaufsverwaltung ====");
-			System.out.println("1 - Suche");
-			System.out.println("2 - Verkauf starten");
-			System.out.println("3 - Zurück zum Hauptmenü");
+			System.out.println("1 - Verkauf starten");
+			System.out.println("2 - Zurück zum Hauptmenü");
 			System.out.print("Bitte wählen: ");
 			String eingabe = scanner.nextLine();
 
 			switch (eingabe) {
 			case "1":
-				sucheService.start();
-
-				if (sucheService.exitToMainMenu) {
-					sucheService.exitToMainMenu = false;
-					zurueck = true;
-				}
-				break;
-			case "2":
 				starteVerkaufsprozess();
 				break;
-			case "3":
+			case "2":
 				zurueck = true;
 				break;
 			default:
@@ -72,9 +61,6 @@ public class VerkaufService extends BaseService {
 		int tab = 1;
 
 		while (!exitVerkauf) {
-			// ❌ ENTFERNE: Tab-Menü mit Hervorhebung (wird in den Tab-Methoden gedruckt)
-
-			// Aktuellen Tab anzeigen
 			switch (tab) {
 			case 1:
 				zeigeWarenkorb();
@@ -95,7 +81,6 @@ public class VerkaufService extends BaseService {
 				System.out.println("(Tab nicht belegt)");
 			}
 
-			// Tab-Navigation mit 0 für Artikel entfernen (nur beim Warenkorb)
 			if (tab == 1 && !warenkorb.isEmpty()) {
 				System.out.print("\nTab auswählen (1-5), 6: Abschluss, 7: Abbrechen, 0: Artikel entfernen\n");
 			} else {
@@ -131,53 +116,43 @@ public class VerkaufService extends BaseService {
 	}
 
 	private void zeigeWarenkorb() {
-	    // ✅ Tab-Menü VOR Warenkorb anzeigen
-	    zeigeTabMenu("Warenkorb");
+		zeigeTabMenu("Warenkorb");
 
-	    if (warenkorb.isEmpty()) {
-	        System.out.println("\nWarenkorb ist leer.");
-	        return;
-	    }
+		if (warenkorb.isEmpty()) {
+			System.out.println("\nWarenkorb ist leer.");
+			return;
+		}
 
-	    // ✅ NEUE, SAUBERE TABELLE
-	    System.out.printf("%-30s | %5s | %12s | %12s%n", "Name", "Menge", "Einzelpreis", "Summe");
-	    System.out.println("=".repeat(70));
+		System.out.printf("%-10s | %-30s | %5s | %12s | %12s%n", "ArtikelID", "Name", "Menge", "Einzelpreis", "Summe");
+		System.out.println("=".repeat(85));
 
-	    double gesamtsumme = 0.0;
+		double gesamtsumme = 0.0;
 
-	    try {
-	        for (Map.Entry<Integer, Integer> entry : warenkorb.entrySet()) {
-	            Artikel artikel = verkaufManager.getArtikelDAO().findById(entry.getKey());
-	            if (artikel != null) {
-	                int menge = entry.getValue();
-	                double summe = artikel.getEinzelpreis() * menge;
-	                gesamtsumme += summe;
+		try {
+			for (Map.Entry<Integer, Integer> entry : warenkorb.entrySet()) {
+				Artikel artikel = verkaufManager.getArtikelDAO().findById(entry.getKey());
+				if (artikel != null) {
+					int menge = entry.getValue();
+					double summe = artikel.getEinzelpreis() * menge;
+					gesamtsumme += summe;
 
-	                String name = artikel.getName() != null ? artikel.getName() : "-";
-	                
-	                // Name auf maximal 30 Zeichen begrenzen
-	                if (name.length() > 30) {
-	                    name = name.substring(0, 27) + "...";
-	                }
+					String name = artikel.getName() != null ? artikel.getName() : "-";
+					if (name.length() > 30) {
+						name = name.substring(0, 27) + "...";
+					}
 
-	                // ✅ FORMATIERTE AUSGABE
-	                System.out.printf("%-30s | %5d | %12s | %12s%n",
-	                    name,
-	                    menge,
-	                    String.format("%,.2f €", artikel.getEinzelpreis()),
-	                    String.format("%,.2f €", summe)
-	                );
-	            }
-	        }
-	        
-	        System.out.println("=".repeat(70));
-	        System.out.printf("%-30s   %5s   %12s   %12s%n", "", "", "Gesamtsumme:", String.format("%,.2f €", gesamtsumme));
+					System.out.printf("%-10d | %-30s | %5d | %12s | %12s%n", artikel.getArtikelID(), name, menge,
+							String.format("%,.2f €", artikel.getEinzelpreis()), String.format("%,.2f €", summe));
+				}
+			}
 
-	    } catch (Exception e) {
-	        System.out.println("Fehler beim Anzeigen des Warenkorbs: " + e.getMessage());
-	    }
+			System.out.println("=".repeat(85));
+			System.out.printf("%-10s   %-30s   %5s   %12s   %12s%n", "", "", "", "Gesamtsumme:",
+					String.format("%,.2f €", gesamtsumme));
+		} catch (Exception e) {
+			System.out.println("Fehler beim Anzeigen des Warenkorbs: " + e.getMessage());
+		}
 	}
-
 
 	private void zeigeTabMenu(String aktiveKategorie) {
 		System.out.print("1 ");
@@ -217,102 +192,95 @@ public class VerkaufService extends BaseService {
 	}
 
 	private void zeigeKategorie(String kategorie) {
-	    try {
-	        List<Artikel> alleArtikel = verkaufManager.getArtikelDAO().findAll();
+		try {
+			List<Artikel> alleArtikel = verkaufManager.getArtikelDAO().findAll();
 
-	        List<Artikel> kategorieArtikel = new ArrayList<>();
-	        for (Artikel artikel : alleArtikel) {
-	            if (artikel.getKategorie() != null && artikel.getKategorie().equalsIgnoreCase(kategorie)) {
-	                kategorieArtikel.add(artikel);
-	            }
-	        }
+			List<Artikel> kategorieArtikel = new ArrayList<>();
+			for (Artikel artikel : alleArtikel) {
+				if (artikel.getKategorie() != null
+						&& artikel.getKategorie().getBezeichnung().equalsIgnoreCase(kategorie)) {
+					kategorieArtikel.add(artikel);
+				}
+			}
 
-	        if (kategorieArtikel.isEmpty()) {
-	            System.out.println("Keine Artikel in dieser Kategorie vorhanden.");
-	            System.out.println("\nEnter drücken zum Fortfahren...");
-	            scanner.nextLine();
-	            return;
-	        }
+			if (kategorieArtikel.isEmpty()) {
+				System.out.println("Keine Artikel in dieser Kategorie vorhanden.");
+				System.out.println("\nEnter drücken zum Fortfahren...");
+				scanner.nextLine();
+				return;
+			}
 
-	        boolean bleibenInKategorie = true;
+			boolean bleibenInKategorie = true;
 
-	        while (bleibenInKategorie) {
-	            // ✅ Tab-Menü VOR jeder Darstellung
-	            zeigeTabMenu(kategorie);
+			while (bleibenInKategorie) {
+				zeigeTabMenu(kategorie);
 
-	            // ✅ NEUE, SAUBERE TABELLE
-	            System.out.printf("%-30s | %12s | %-40s%n", "Name", "Einzelpreis", "Kommentar");
-	            System.out.println("=".repeat(90));
+				System.out.printf("%-10s | %-30s | %12s | %-40s%n", "ArtikelID", "Name", "Einzelpreis", "Kommentar");
+				System.out.println("=".repeat(100));
 
-	            for (Artikel artikel : kategorieArtikel) {
-	                String name = artikel.getName() != null ? artikel.getName() : "-";
-	                String kommentar = artikel.getKommentar() != null ? artikel.getKommentar() : "-";
+				for (Artikel artikel : kategorieArtikel) {
+					String name = artikel.getName() != null ? artikel.getName() : "-";
+					String kommentar = artikel.getKommentar() != null ? artikel.getKommentar() : "-";
 
-	                // Namen und Kommentar begrenzen
-	                if (name.length() > 30) {
-	                    name = name.substring(0, 27) + "...";
-	                }
-	                if (kommentar.length() > 40) {
-	                    kommentar = kommentar.substring(0, 37) + "...";
-	                }
+					if (name.length() > 30) {
+						name = name.substring(0, 27) + "...";
+					}
+					if (kommentar.length() > 40) {
+						kommentar = kommentar.substring(0, 37) + "...";
+					}
 
-	                // ✅ FORMATIERTE AUSGABE
-	                System.out.printf("%-30s | %12s | %-40s%n",
-	                    name,
-	                    String.format("%,.2f €", artikel.getEinzelpreis()),
-	                    kommentar
-	                );
-	            }
-	            
-	            System.out.println("=".repeat(90));
+					System.out.printf("%-10d | %-30s | %12s | %-40s%n", artikel.getArtikelID(), name,
+							String.format("%,.2f €", artikel.getEinzelpreis()), kommentar);
+				}
 
-	            System.out.print("\nArtikel hinzufügen? (ArtikelID oder 0 zum Verlassen): ");
-	            String eingabe = scanner.nextLine();
+				System.out.println("=".repeat(100));
 
-	            if (eingabe.equals("0")) {
-	                bleibenInKategorie = false;
-	            } else if (!eingabe.isBlank()) {
-	                try {
-	                    int artikelID = Integer.parseInt(eingabe);
+				System.out.print("\nArtikel hinzufügen? (ArtikelID oder 0 zum Verlassen): ");
+				String eingabe = scanner.nextLine();
 
-	                    Artikel gewählterArtikel = null;
-	                    for (Artikel artikel : kategorieArtikel) {
-	                        if (artikel.getArtikelID() == artikelID) {
-	                            gewählterArtikel = artikel;
-	                            break;
-	                        }
-	                    }
+				if (eingabe.equals("0")) {
+					bleibenInKategorie = false;
+				} else if (!eingabe.isBlank()) {
+					try {
+						int artikelID = Integer.parseInt(eingabe);
 
-	                    if (gewählterArtikel != null) {
-	                        int menge = 1;
-	                        int neueGesamtanzahl = warenkorb.getOrDefault(gewählterArtikel.getArtikelID(), 0) + menge;
-	                        warenkorb.put(gewählterArtikel.getArtikelID(), neueGesamtanzahl);
+						Artikel gewählterArtikel = null;
+						for (Artikel artikel : kategorieArtikel) {
+							if (artikel.getArtikelID() == artikelID) {
+								gewählterArtikel = artikel;
+								break;
+							}
+						}
 
-	                        if (neueGesamtanzahl > 1) {
-	                            System.out.println("✓ 1x " + gewählterArtikel.getName()
-	                                + " zum Warenkorb hinzugefügt! (Gesamt: " + neueGesamtanzahl + "x)");
-	                        } else {
-	                            System.out
-	                                .println("✓ 1x " + gewählterArtikel.getName() + " zum Warenkorb hinzugefügt!");
-	                        }
-	                        System.out.println();
-	                    } else {
-	                        System.out.println("✗ ArtikelID nicht in dieser Kategorie gefunden!");
-	                        System.out.println();
-	                    }
-	                } catch (NumberFormatException e) {
-	                    System.out.println("✗ Ungültige Eingabe!");
-	                    System.out.println();
-	                }
-	            }
-	        }
+						if (gewählterArtikel != null) {
+							int menge = 1;
+							int neueGesamtanzahl = warenkorb.getOrDefault(gewählterArtikel.getArtikelID(), 0) + menge;
+							warenkorb.put(gewählterArtikel.getArtikelID(), neueGesamtanzahl);
 
-	    } catch (Exception e) {
-	        System.out.println("Fehler beim Anzeigen der Kategorie: " + e.getMessage());
-	        e.printStackTrace();
-	    }
+							if (neueGesamtanzahl > 1) {
+								System.out.println("✓ 1x " + gewählterArtikel.getName()
+										+ " zum Warenkorb hinzugefügt! (Gesamt: " + neueGesamtanzahl + "x)");
+							} else {
+								System.out
+										.println("✓ 1x " + gewählterArtikel.getName() + " zum Warenkorb hinzugefügt!");
+							}
+							System.out.println();
+						} else {
+							System.out.println("✗ ArtikelID nicht in dieser Kategorie gefunden!");
+							System.out.println();
+						}
+					} catch (NumberFormatException e) {
+						System.out.println("✗ Ungültige Eingabe!");
+						System.out.println();
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			System.out.println("Fehler beim Anzeigen der Kategorie: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
-
 
 	private void artikelEntfernen() {
 		System.out.print("\nArtikel entfernen (ArtikelID eingeben oder Enter zum Abbrechen): ");
@@ -326,11 +294,9 @@ public class VerkaufService extends BaseService {
 					int aktuelleAnzahl = warenkorb.get(artikelID);
 
 					if (aktuelleAnzahl > 1) {
-						// Anzahl um 1 reduzieren
 						warenkorb.put(artikelID, aktuelleAnzahl - 1);
 						System.out.println("✓ Anzahl um 1 reduziert. Neue Anzahl: " + (aktuelleAnzahl - 1));
 					} else {
-						// Artikel komplett entfernen (wenn Anzahl = 1)
 						warenkorb.remove(artikelID);
 						System.out.println("✓ Artikel komplett entfernt.");
 					}
@@ -349,26 +315,22 @@ public class VerkaufService extends BaseService {
 			return false;
 		}
 
-		// 1. Warenkorb anzeigen
 		zeigeTabMenu("Warenkorb");
 		System.out.println();
 
 		try {
-			// 2. Zahlungsart auswählen
 			int zahlungsID = wähleZahlungsart();
 			if (zahlungsID == -1) {
 				System.out.println("Verkauf abgebrochen.");
 				return false;
 			}
 
-			// 3. Kunde suchen und auswählen
 			Object kunde = sucheKunde();
 			if (kunde == null) {
 				System.out.println("Verkauf abgebrochen.");
 				return false;
 			}
 
-			// 4. Zahlungsart validieren
 			boolean istMitglied = kunde instanceof Mitglieder;
 			String zahlungsart = getZahlungsartName(zahlungsID);
 
@@ -385,7 +347,6 @@ public class VerkaufService extends BaseService {
 
 			Mitglieder mitglied = (Mitglieder) kunde;
 
-			// 5. Gesamtpreis berechnen
 			double gesamtpreis = 0.0;
 			for (Map.Entry<Integer, Integer> entry : warenkorb.entrySet()) {
 				Artikel artikel = verkaufManager.getArtikelDAO().findById(entry.getKey());
@@ -394,7 +355,6 @@ public class VerkaufService extends BaseService {
 				}
 			}
 
-			// 6. Abschluss-Bestätigung
 			System.out.println("\n=== Verkaufsübersicht ===");
 			System.out.println("Kunde: " + mitglied.getVorname() + " " + mitglied.getNachname() + " (Mitglied-ID: "
 					+ mitglied.getMitgliederID() + ")");
@@ -407,7 +367,6 @@ public class VerkaufService extends BaseService {
 			String bestaetigung = scanner.nextLine();
 
 			if (bestaetigung.equalsIgnoreCase("ja")) {
-				// Bestellung in Datenbank speichern
 				speichereBestellung(mitglied, zahlungsID, gesamtpreis);
 
 				System.out.println("\n✓ Verkauf erfolgreich abgeschlossen und in Datenbank gespeichert!");
@@ -430,7 +389,6 @@ public class VerkaufService extends BaseService {
 		System.out.println("\n=== Zahlungsart wählen ===");
 
 		try {
-			// Hole alle Zahlungsarten aus der Datenbank
 			List<Zahlung> zahlungsarten = verkaufManager.getZahlungDAO().findAll();
 
 			if (zahlungsarten.isEmpty()) {
@@ -438,7 +396,6 @@ public class VerkaufService extends BaseService {
 				return -1;
 			}
 
-			// Zeige Zahlungsarten
 			System.out.println("ZahlungsID | Bezeichnung");
 			System.out.println("-----------------------------");
 			for (Zahlung zahlung : zahlungsarten) {
@@ -455,7 +412,6 @@ public class VerkaufService extends BaseService {
 
 			int zahlungID = Integer.parseInt(eingabe);
 
-			// Prüfe, ob ID existiert
 			for (Zahlung zahlung : zahlungsarten) {
 				if (zahlung.getZahlungID() == zahlungID) {
 					return zahlungID;
@@ -488,12 +444,10 @@ public class VerkaufService extends BaseService {
 
 		try {
 			if (auswahl.equals("1")) {
-				// Suche nach MitgliederID
 				System.out.print("MitgliederID eingeben: ");
 				String idStr = scanner.nextLine();
 				int mitgliederID = Integer.parseInt(idStr);
 
-				// Suche Mitglied
 				Mitglieder mitglied = verkaufManager.getMitgliederDAO().findById(mitgliederID);
 
 				if (mitglied != null) {
@@ -507,26 +461,19 @@ public class VerkaufService extends BaseService {
 				}
 
 			} else if (auswahl.equals("2")) {
-				// Suche nach Vorname und Nachname
 				System.out.print("Vorname eingeben: ");
 				String vorname = scanner.nextLine();
 
 				System.out.print("Nachname eingeben: ");
 				String nachname = scanner.nextLine();
 
-				// Suche in Mitglieder
 				List<Mitglieder> mitglieder = verkaufManager.getMitgliederDAO().searchByName(vorname, nachname);
-
-				// Suche in Interessenten (falls du eine InteressentenDAO hast)
-				// List<Interessent> interessenten =
-				// verkaufManager.getInteressentenDAO().searchByName(vorname, nachname);
 
 				if (mitglieder.isEmpty()) {
 					System.out.println("✗ Keine Ergebnisse gefunden!");
 					return null;
 				}
 
-				// Zeige Ergebnisse
 				System.out.println("\n=== Suchergebnisse ===");
 				System.out.println("MitgliederID | Vorname           | Nachname          | Typ");
 				System.out.println("-------------------------------------------------------------------");
@@ -631,5 +578,4 @@ public class VerkaufService extends BaseService {
 			return "Unbekannt";
 		}
 	}
-
 }

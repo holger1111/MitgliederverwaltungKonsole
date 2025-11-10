@@ -1,23 +1,22 @@
 package New.DAOs;
 
 import New.Objekte.Artikel;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import New.Objekte.Kategorie;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ArtikelDAO extends BaseDAO<Artikel> {
+    private KategorieDAO kategorieDAO;
 
     public ArtikelDAO(Connection connection) {
         super(connection);
+        this.kategorieDAO = new KategorieDAO(connection);
     }
 
     @Override
     public void insert(Artikel artikel) throws SQLException {
-        String sql = "INSERT INTO Artikel (Name, Einzelpreis, Kommentar, Kategorie) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Artikel (Name, Einzelpreis, Kommentar, KategorieID) VALUES (?, ?, ?, ?)";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -25,9 +24,9 @@ public class ArtikelDAO extends BaseDAO<Artikel> {
             ps.setString(1, artikel.getName());
             ps.setDouble(2, artikel.getEinzelpreis());
             ps.setString(3, artikel.getKommentar());
-            ps.setString(4, artikel.getKategorie());
+            ps.setInt(4, artikel.getKategorie().getKategorieID()); // Änderung!
             ps.executeUpdate();
-            
+
             rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 artikel.setArtikelID(rs.getInt(1));
@@ -39,7 +38,7 @@ public class ArtikelDAO extends BaseDAO<Artikel> {
 
     @Override
     public Artikel findById(int id) throws SQLException {
-        String sql = "SELECT ArtikelID, Name, Einzelpreis, Kommentar, Kategorie FROM Artikel WHERE ArtikelID = ?";
+        String sql = "SELECT ArtikelID, Name, Einzelpreis, Kommentar, KategorieID FROM Artikel WHERE ArtikelID = ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -57,14 +56,14 @@ public class ArtikelDAO extends BaseDAO<Artikel> {
 
     @Override
     public void update(Artikel artikel) throws SQLException {
-        String sql = "UPDATE Artikel SET Name = ?, Einzelpreis = ?, Kommentar = ?, Kategorie = ? WHERE ArtikelID = ?";
+        String sql = "UPDATE Artikel SET Name = ?, Einzelpreis = ?, Kommentar = ?, KategorieID = ? WHERE ArtikelID = ?";
         PreparedStatement ps = null;
         try {
             ps = connection.prepareStatement(sql);
             ps.setString(1, artikel.getName());
             ps.setDouble(2, artikel.getEinzelpreis());
             ps.setString(3, artikel.getKommentar());
-            ps.setString(4, artikel.getKategorie());
+            ps.setInt(4, artikel.getKategorie().getKategorieID()); // Änderung!
             ps.setInt(5, artikel.getArtikelID());
             ps.executeUpdate();
         } finally {
@@ -86,8 +85,7 @@ public class ArtikelDAO extends BaseDAO<Artikel> {
     }
 
     public List<Artikel> findAll() throws SQLException {
-        // ✅ WICHTIG: Kategorie in SELECT aufnehmen
-        String sql = "SELECT ArtikelID, Name, Einzelpreis, Kommentar, Kategorie FROM Artikel";
+        String sql = "SELECT ArtikelID, Name, Einzelpreis, Kommentar, KategorieID FROM Artikel";
         List<Artikel> list = new ArrayList<>();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -103,14 +101,14 @@ public class ArtikelDAO extends BaseDAO<Artikel> {
         return list;
     }
 
+    // Hilfsmethode: Sucht nach allen Attributen
     public List<Artikel> searchAllAttributes(String searchTerm) throws SQLException {
         List<Artikel> result = new ArrayList<>();
-        // ✅ WICHTIG: Kategorie in SELECT und WHERE aufnehmen
-        String sql = "SELECT ArtikelID, Name, Einzelpreis, Kommentar, Kategorie FROM Artikel WHERE " +
+        String sql = "SELECT ArtikelID, Name, Einzelpreis, Kommentar, KategorieID FROM Artikel WHERE " +
                      "CAST(ArtikelID AS CHAR) LIKE ? OR " +
                      "LOWER(Name) LIKE ? OR " +
                      "LOWER(Kommentar) LIKE ? OR " +
-                     "LOWER(Kategorie) LIKE ?";
+                     "CAST(KategorieID AS CHAR) LIKE ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -130,15 +128,18 @@ public class ArtikelDAO extends BaseDAO<Artikel> {
         return result;
     }
 
-    // ✅ WICHTIG: Kategorie aus ResultSet auslesen
+    // Änderung: Kategorie als Objekt holen
     private Artikel mapRowToArtikel(ResultSet rs) throws SQLException {
+        int kategorieID = rs.getInt("KategorieID");
+        Kategorie kategorie = kategorieDAO.findById(kategorieID);
+
         Artikel artikel = new Artikel(
             rs.getInt("ArtikelID"),
             rs.getString("Name"),
             rs.getDouble("Einzelpreis"),
-            rs.getString("Kommentar")
+            rs.getString("Kommentar"),
+            kategorie
         );
-        artikel.setKategorie(rs.getString("Kategorie"));
         return artikel;
     }
 }

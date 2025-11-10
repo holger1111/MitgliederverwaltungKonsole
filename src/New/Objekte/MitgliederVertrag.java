@@ -1,6 +1,5 @@
 package New.Objekte;
 
-
 import New.Helper.Datum;
 import New.Helper.StripEntry;
 import New.Validator.BooleanValidator;
@@ -25,6 +24,7 @@ public class MitgliederVertrag {
     private Double preisrabatt;
     private int intervallID;
     private int zahlungID;
+    private int mitarbeiterID;    // NEU
     private Date trainingsbeginn;
     private String kommentar;
 
@@ -33,7 +33,7 @@ public class MitgliederVertrag {
     public MitgliederVertrag(
             int vertragNr, int mitgliederID, int vertragID, Date vertragsbeginn, Date vertragsende,
             boolean verlängerung, boolean aktiv, boolean gekündigt, Double preisrabatt,
-            int intervallID, int zahlungID, Date trainingsbeginn, String kommentar) {
+            int intervallID, int zahlungID, int mitarbeiterID, Date trainingsbeginn, String kommentar) {
         this.vertragNr = vertragNr;
         this.mitgliederID = mitgliederID;
         this.vertragID = vertragID;
@@ -45,12 +45,12 @@ public class MitgliederVertrag {
         this.preisrabatt = preisrabatt;
         this.intervallID = intervallID;
         this.zahlungID = zahlungID;
+        this.mitarbeiterID = mitarbeiterID;
         this.trainingsbeginn = trainingsbeginn;
         this.kommentar = kommentar;
     }
 
     // Getter & Setter
-
     public int getVertragNr() { return vertragNr; }
     public void setVertragNr(int vertragNr) { this.vertragNr = vertragNr; }
     public int getMitgliederID() { return mitgliederID; }
@@ -73,6 +73,8 @@ public class MitgliederVertrag {
     public void setIntervallID(int intervallID) { this.intervallID = intervallID; }
     public int getZahlungID() { return zahlungID; }
     public void setZahlungID(int zahlungID) { this.zahlungID = zahlungID; }
+    public int getMitarbeiterID() { return mitarbeiterID; }        // NEU
+    public void setMitarbeiterID(int mitarbeiterID) { this.mitarbeiterID = mitarbeiterID; } // NEU
     public Date getTrainingsbeginn() { return trainingsbeginn; }
     public void setTrainingsbeginn(Date trainingsbeginn) { this.trainingsbeginn = trainingsbeginn; }
     public String getKommentar() { return kommentar; }
@@ -104,7 +106,7 @@ public class MitgliederVertrag {
 
         return String.format(
             "MitgliederVertrag:\n"
-            + "Nr: %d | MitgliedID: %d | VertragID: %d\n"
+            + "Nr: %d | MitgliedID: %d | VertragID: %d | MitarbeiterID: %d\n"
             + "Vertragsbeginn: %s | Vertragsende: %s\n"
             + "Trainingsbeginn: %s\n"
             + "Status: %s\n"
@@ -113,6 +115,7 @@ public class MitgliederVertrag {
             vertragNr,
             mitgliederID,
             vertragID,
+            mitarbeiterID,
             vertragsbeginnStr,
             vertragsendeStr,
             trainingsbeginnStr,
@@ -123,7 +126,6 @@ public class MitgliederVertrag {
             kommentarClean
         );
     }
-
 
     public void validateAll(
         Vertrag vertrag,

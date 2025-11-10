@@ -32,10 +32,11 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
         );
     }
 
+    // Angepasste Insert-Methode mit MitarbeiterID
     public void insert(MitgliederVertrag mv, Vertrag vertrag, Zahlung zahlung, Mitglieder mitglied, int laufzeitWochen)
             throws Exception {
         mv.validateAll(vertrag, zahlung, mitglied, laufzeitWochen);
-        String sql = "INSERT INTO MitgliederVertrag (MitgliederID, VertragID, Vertragsbeginn, Vertragsende, Verlängerung, Aktiv, Gekündigt, Preisrabatt, IntervallID, ZahlungID, Trainingsbeginn, Kommentar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO MitgliederVertrag (MitgliederID, VertragID, Vertragsbeginn, Vertragsende, Verlängerung, Aktiv, Gekündigt, Preisrabatt, IntervallID, ZahlungID, MitarbeiterID, Trainingsbeginn, Kommentar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, mv.getMitgliederID());
             ps.setInt(2, mv.getVertragID());
@@ -47,8 +48,9 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
             ps.setDouble(8, mv.getPreisrabatt());
             ps.setInt(9, mv.getIntervallID());
             ps.setInt(10, mv.getZahlungID());
-            ps.setDate(11, mv.getTrainingsbeginn() != null ? new java.sql.Date(mv.getTrainingsbeginn().getTime()) : null);
-            ps.setString(12, mv.getKommentar());
+            ps.setInt(11, mv.getMitarbeiterID()); // NEU
+            ps.setDate(12, mv.getTrainingsbeginn() != null ? new java.sql.Date(mv.getTrainingsbeginn().getTime()) : null);
+            ps.setString(13, mv.getKommentar());
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
@@ -70,10 +72,11 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
         return null;
     }
 
+    // Angepasste Update-Methode mit MitarbeiterID
     public void update(MitgliederVertrag mv, Vertrag vertrag, Zahlung zahlung, Mitglieder mitglied, int laufzeitWochen)
             throws Exception {
         mv.validateAll(vertrag, zahlung, mitglied, laufzeitWochen);
-        String sql = "UPDATE MitgliederVertrag SET MitgliederID=?, VertragID=?, Vertragsbeginn=?, Vertragsende=?, Verlängerung=?, Aktiv=?, Gekündigt=?, Preisrabatt=?, IntervallID=?, ZahlungID=?, Trainingsbeginn=?, Kommentar=? WHERE VertragNr=?";
+        String sql = "UPDATE MitgliederVertrag SET MitgliederID=?, VertragID=?, Vertragsbeginn=?, Vertragsende=?, Verlängerung=?, Aktiv=?, Gekündigt=?, Preisrabatt=?, IntervallID=?, ZahlungID=?, MitarbeiterID=?, Trainingsbeginn=?, Kommentar=? WHERE VertragNr=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, mv.getMitgliederID());
             ps.setInt(2, mv.getVertragID());
@@ -85,9 +88,10 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
             ps.setDouble(8, mv.getPreisrabatt());
             ps.setInt(9, mv.getIntervallID());
             ps.setInt(10, mv.getZahlungID());
-            ps.setDate(11, mv.getTrainingsbeginn() != null ? new java.sql.Date(mv.getTrainingsbeginn().getTime()) : null);
-            ps.setString(12, mv.getKommentar());
-            ps.setInt(13, mv.getVertragNr());
+            ps.setInt(11, mv.getMitarbeiterID()); // NEU
+            ps.setDate(12, mv.getTrainingsbeginn() != null ? new java.sql.Date(mv.getTrainingsbeginn().getTime()) : null);
+            ps.setString(13, mv.getKommentar());
+            ps.setInt(14, mv.getVertragNr());
             ps.executeUpdate();
         }
     }
@@ -112,29 +116,30 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
         }
         return list;
     }
-    
+
     public List<MitgliederVertrag> searchAllAttributes(String searchTerm) throws SQLException {
         List<MitgliederVertrag> result = new ArrayList<>();
         String sql = "SELECT * FROM MitgliederVertrag WHERE " +
                      "CAST(VertragNr AS CHAR) LIKE ? OR " +
                      "CAST(MitgliederID AS CHAR) LIKE ? OR " +
                      "CAST(VertragID AS CHAR) LIKE ? OR " +
+                     "CAST(MitarbeiterID AS CHAR) LIKE ? OR " +
                      "LOWER(Kommentar) LIKE ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String like = "%" + searchTerm.toLowerCase() + "%";
             ps.setString(1, like);
             ps.setString(2, like);
             ps.setString(3, like);
-            ps.setString(4, like);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    result.add(mapRowToMitgliederVertrag(rs));
-                }
+            ps.setString(4, like); // MitarbeiterID
+            ps.setString(5, like);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                result.add(mapRowToMitgliederVertrag(rs));
             }
         }
         return result;
     }
-    
+
     public List<MitgliederVertrag> findByMitgliedId(int mitgliedId) throws SQLException {
         List<MitgliederVertrag> result = new ArrayList<>();
         String sql = "SELECT * FROM MitgliederVertrag WHERE MitgliederID = ?";
@@ -153,10 +158,9 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
         String sql = "SELECT * FROM MitgliederVertrag WHERE ZahlungID = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, zahlungId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    result.add(mapRowToMitgliederVertrag(rs));
-                }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                result.add(mapRowToMitgliederVertrag(rs));
             }
         }
         return result;
@@ -167,10 +171,9 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
         String sql = "SELECT * FROM MitgliederVertrag WHERE VertragID = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, vertragId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    result.add(mapRowToMitgliederVertrag(rs));
-                }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                result.add(mapRowToMitgliederVertrag(rs));
             }
         }
         return result;
@@ -181,10 +184,22 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
         String sql = "SELECT * FROM MitgliederVertrag WHERE IntervallID = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, intervallId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    result.add(mapRowToMitgliederVertrag(rs));
-                }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                result.add(mapRowToMitgliederVertrag(rs));
+            }
+        }
+        return result;
+    }
+
+    public List<MitgliederVertrag> findByMitarbeiterId(int mitarbeiterId) throws SQLException {
+        List<MitgliederVertrag> result = new ArrayList<>();
+        String sql = "SELECT * FROM MitgliederVertrag WHERE MitarbeiterID = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, mitarbeiterId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                result.add(mapRowToMitgliederVertrag(rs));
             }
         }
         return result;
@@ -203,6 +218,7 @@ public class MitgliederVertragDAO extends BaseDAO<MitgliederVertrag> {
         mv.setPreisrabatt(rs.getDouble("Preisrabatt"));
         mv.setIntervallID(rs.getInt("IntervallID"));
         mv.setZahlungID(rs.getInt("ZahlungID"));
+        mv.setMitarbeiterID(rs.getInt("MitarbeiterID")); // NEU
         mv.setTrainingsbeginn(rs.getDate("Trainingsbeginn"));
         mv.setKommentar(rs.getString("Kommentar"));
         return mv;

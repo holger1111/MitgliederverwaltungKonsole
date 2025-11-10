@@ -25,29 +25,20 @@ public class MitgliederService extends BaseService {
         boolean zurueck = false;
         while (!zurueck) {
             System.out.println("==== Mitgliederverwaltung ====");
-            System.out.println("1 - Suche");
-            System.out.println("2 - Interessenten erstellen");
-            System.out.println("3 - Mitglieder erstellen");
-            System.out.println("4 - Zurück zum Hauptmenü");
+            System.out.println("1 - Interessenten erstellen");
+            System.out.println("2 - Mitglieder erstellen");
+            System.out.println("3 - Zurück zum Hauptmenü");
             System.out.print("Bitte wählen: ");
             String eingabe = scanner.nextLine();
 
             switch (eingabe) {
                 case "1":
-                    SucheService sucheService = new SucheService(connection, scanner);
-                    sucheService.start();
-                    // Prüfe Exit-Flag
-                    if (sucheService.shouldExitToMainMenu()) {
-                        return;  // Zurück zum Hauptmenü
-                    }
-                    break;
-                case "2":
                     interessentErstellen();
                     break;
-                case "3":
+                case "2":
                     mitgliedErstellen();
                     break;
-                case "4":
+                case "3":
                     zurueck = true;
                     break;
                 default:
@@ -55,7 +46,6 @@ public class MitgliederService extends BaseService {
             }
         }
     }
-
 
     private void interessentErstellen() {
         System.out.println("Interessentenerstellung ausgewählt");
@@ -199,5 +189,4 @@ public class MitgliederService extends BaseService {
             e.printStackTrace();
         }
     }
-
 }

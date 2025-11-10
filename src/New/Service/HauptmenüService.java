@@ -11,7 +11,7 @@ public class HauptmenüService extends BaseService {
     private final VertragService vertragService;
     private final ÜbersichtService übersichtService;
     private final SucheService sucheService;
-//    private final AdminService adminService;
+    private final AdminService adminService;   // wieder aktiviert!
 
     public HauptmenüService(Connection connection, Scanner scanner,
                            MitgliederService mitgliederService,
@@ -19,8 +19,8 @@ public class HauptmenüService extends BaseService {
                            KursService kursService,
                            VertragService vertragService,
                            ÜbersichtService übersichtService,
-                           SucheService sucheService
-//                           , AdminService adminService
+                           SucheService sucheService,
+                           AdminService adminService   // wieder aktiviert!
                            ) {
         super(connection, scanner);
         this.mitgliederService = mitgliederService;
@@ -29,7 +29,7 @@ public class HauptmenüService extends BaseService {
         this.vertragService = vertragService;
         this.übersichtService = übersichtService;
         this.sucheService = sucheService;
-//        this.adminService = adminService;
+        this.adminService = adminService;   // wieder aktiviert!
     }
 
     public void start() {
@@ -43,7 +43,7 @@ public class HauptmenüService extends BaseService {
             System.out.println("3 - Verkauf");
             System.out.println("4 - Kurse");
             System.out.println("5 - Verträge");
-//            System.out.println("6 - Admin");
+            System.out.println("6 - Admin");  // wieder aktiviert!
             System.out.println("7 - Suche");
             System.out.println("0 - Programm beenden");
             System.out.print("Bitte eine Zahl eingeben: ");
@@ -66,9 +66,9 @@ public class HauptmenüService extends BaseService {
                 case "5":
                     vertragService.start();
                     break;
-//                case "6":
-//                    adminService.start();
-//                    break;
+                case "6":    // wieder aktiviert!
+                    adminService.start();
+                    break;
                 case "7":
                     sucheService.start();
                     break;

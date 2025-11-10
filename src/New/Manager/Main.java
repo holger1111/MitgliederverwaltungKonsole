@@ -18,14 +18,14 @@ public class Main {
             connection = connectionManager.getConnection();
             System.out.println("✓ Datenbankverbindung erfolgreich!\n");
 
-            // ========== SERVICES INITIALISIEREN ==========
+         // ========== SERVICES INITIALISIEREN ==========
             MitgliederService mitgliederService = new MitgliederService(connection, scanner);
             VerkaufService verkaufService = new VerkaufService(connection, scanner);
             KursService kursService = new KursService(connection, scanner);
             VertragService vertragService = new VertragService(connection, scanner);
             ÜbersichtService übersichtService = new ÜbersichtService(connection, scanner);
             SucheService sucheService = new SucheService(connection, scanner);
-//            AdminService adminService = new AdminService(connection, scanner);
+            AdminService adminService = new AdminService(connection, scanner); // wieder aktivieren!
 
             HauptmenüService hauptmenüService = new HauptmenüService(
                 connection, scanner,
@@ -34,10 +34,10 @@ public class Main {
                 kursService,
                 vertragService,
                 übersichtService,
-                sucheService
-//                ,
-//                adminService
+                sucheService,
+                adminService         // jetzt wieder dabei!
             );
+
 
             // ========== PROGRAMM STARTEN ==========
             hauptmenüService.start();

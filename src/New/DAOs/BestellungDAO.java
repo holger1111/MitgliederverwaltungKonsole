@@ -1,11 +1,7 @@
 package New.DAOs;
 
 import New.Objekte.Bestellung;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +13,8 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
 
     @Override
     public void insert(Bestellung bestellung) throws SQLException {
-        String sql = "INSERT INTO Bestellung (MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID) " +
-                     "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Bestellung (MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID, MitarbeiterID) " +
+                     "VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -27,9 +23,8 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
             ps.setDouble(2, bestellung.getGesamtpreis());
             ps.setTimestamp(3, bestellung.getBestelldatum());
             ps.setInt(4, bestellung.getZahlungID());
+            ps.setInt(5, bestellung.getMitarbeiterID());
             ps.executeUpdate();
-            
-            // Generierte ID abrufen
             rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 bestellung.setBestellungID(rs.getInt(1));
@@ -41,7 +36,7 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
 
     @Override
     public Bestellung findById(int id) throws SQLException {
-        String sql = "SELECT BestellungID, MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID " +
+        String sql = "SELECT BestellungID, MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID, MitarbeiterID " +
                      "FROM Bestellung WHERE BestellungID = ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -60,8 +55,7 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
 
     @Override
     public void update(Bestellung bestellung) throws SQLException {
-        String sql = "UPDATE Bestellung SET MitgliederID = ?, Gesamtpreis = ?, " +
-                     "Bestelldatum = ?, ZahlungID = ? WHERE BestellungID = ?";
+        String sql = "UPDATE Bestellung SET MitgliederID = ?, Gesamtpreis = ?, Bestelldatum = ?, ZahlungID = ?, MitarbeiterID = ? WHERE BestellungID = ?";
         PreparedStatement ps = null;
         try {
             ps = connection.prepareStatement(sql);
@@ -69,7 +63,8 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
             ps.setDouble(2, bestellung.getGesamtpreis());
             ps.setTimestamp(3, bestellung.getBestelldatum());
             ps.setInt(4, bestellung.getZahlungID());
-            ps.setInt(5, bestellung.getBestellungID());
+            ps.setInt(5, bestellung.getMitarbeiterID());
+            ps.setInt(6, bestellung.getBestellungID());
             ps.executeUpdate();
         } finally {
             closeResources(null, ps);
@@ -90,7 +85,7 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
     }
 
     public List<Bestellung> findByMitgliederId(int mitgliederID) throws SQLException {
-        String sql = "SELECT BestellungID, MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID " +
+        String sql = "SELECT BestellungID, MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID, MitarbeiterID " +
                      "FROM Bestellung WHERE MitgliederID = ?";
         List<Bestellung> list = new ArrayList<>();
         PreparedStatement ps = null;
@@ -109,7 +104,7 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
     }
 
     public List<Bestellung> findAll() throws SQLException {
-        String sql = "SELECT BestellungID, MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID FROM Bestellung";
+        String sql = "SELECT BestellungID, MitgliederID, Gesamtpreis, Bestelldatum, ZahlungID, MitarbeiterID FROM Bestellung";
         List<Bestellung> list = new ArrayList<>();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -129,7 +124,8 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
         List<Bestellung> result = new ArrayList<>();
         String sql = "SELECT * FROM Bestellung WHERE " +
                      "CAST(BestellungID AS CHAR) LIKE ? OR " +
-                     "CAST(MitgliederID AS CHAR) LIKE ?";
+                     "CAST(MitgliederID AS CHAR) LIKE ? OR " +
+                     "CAST(MitarbeiterID AS CHAR) LIKE ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -137,6 +133,7 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
             String like = "%" + searchTerm.toLowerCase() + "%";
             ps.setString(1, like);
             ps.setString(2, like);
+            ps.setString(3, like);
             rs = ps.executeQuery();
             while (rs.next()) {
                 result.add(mapRowToBestellung(rs));
@@ -153,7 +150,8 @@ public class BestellungDAO extends BaseDAO<Bestellung> {
             rs.getInt("MitgliederID"),
             rs.getDouble("Gesamtpreis"),
             rs.getTimestamp("Bestelldatum"),
-            rs.getInt("ZahlungID")
+            rs.getInt("ZahlungID"),
+            rs.getInt("MitarbeiterID") // NEU
         );
     }
 }
