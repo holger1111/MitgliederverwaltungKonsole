@@ -1,0 +1,28 @@
+-- Zahlungsdaten ändern
+
+-- Prüfe Zahlungsdaten und speichere ZahlungsdatenID
+
+SELECT ZahlungsdatenID, Name, IBAN, BIC
+	FROM Zahlungsdaten AS zd
+	JOIN Mitglieder AS m
+	ON m.ZahlungsdatenID = zd.ZahlungsdatenID
+		WHERE m.MitgliederID = ?;
+
+-- Ändere Name, IBAN, BIC
+
+UPDATE Zahlungsdaten AS zd
+	SET	Name = 	CASE
+		    		WHEN ? IS NOT NULL THEN ?-- Name VARCHAR(255)
+		    		ELSE Name
+		    	END,
+		IBAN =	CASE
+			    WHEN ? IS NOT NULL THEN ?	-- IBAN VARCHAR(255)
+		    	ELSE IBAN
+			END,
+		BIC = 	CASE
+		    	WHEN ? IS NOT NULL THEN ?	-- BIC VARCHAR(255)
+		    	ELSE BIC
+			END
+		WHERE ZahlungsdatenID = ?;		-- ZahlungsdatenID
+		
+		

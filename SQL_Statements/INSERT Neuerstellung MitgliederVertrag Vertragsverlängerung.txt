@@ -1,0 +1,85 @@
+-- Anlegen neuer MitgliederVertrag bei aktiver Vertragsverlängerung:
+
+START TRANSACTION;		-- ROLLBACK; immer zwischendrin als Option zum Abbrechen einbauen
+
+-- Prüfe Person sowie Speicherung MitgliederID
+
+SELECT MitgliederID, Vorname, Nachname, Geburtsdatum, Aktiv
+	FROM Mitglieder
+	WHERE Vorname LIKE CONCAT("%", ?, "%")	--Vorname LIKE--
+	AND Nachname LIKE CONCAT("%", ?, "%")	--Nachname LIKE--
+	AND Geburtsdatum LIKE CONCAT(?, "%");	--Geburtsjahr--
+
+-- Prüfe Status von aktivem MitgliederVertrag
+
+SELECT mv.VertragNr, v.Bezeichnung, mv.Aktiv, v.Laufzeit, mv.Trainingsbeginn, mv.Vertragsbeginn, mv.Vertragsende, mv.Verlängerung, mv.Gekündigt, SUM(v.Grundpreis - mv.Preisrabatt) AS Vertragspreis, i.Bezeichnung, z.Zahlungsart, mv.Kommentar
+	FROM MitgliederVertrag AS mv
+	JOIN Zahlung AS z
+	ON z.ZahlungID = mv.ZahlungID
+	JOIN Vertrag AS v
+	ON v.VertragID = mv.VertragID
+	JOIN Intervall AS i
+	ON i.IntervallID = mv.IntervallID
+	JOIN Mitglieder AS m
+	ON m.MitgliederID = mv.MitgliederID
+		WHERE m.MitgliederID = ?
+		AND mv.Aktiv = 1
+			GROUP BY mv. VertraNr, v.Bezeichnung, mv.Aktiv, v.Laufzeit, mv.Trainingsbeginn, mv.Vertragsbeginn, mv.Vertragsende, mv.Verlängerung, mv.Gekündigt, i.Bezeichnung, z.Zahlungsart, mv.Kommentar;
+
+-- Erstellung neuer, inaktiver MitgliederVertrag
+
+INSERT INTO MitgliederVertrag
+	VALUES
+		(
+		NULL,
+		?,		--MitgliederID--
+		(
+			SELECT VertragID
+				FROM Vertrag
+					WHERE Bezeichnung = ?	-- Bezeichnung
+					LIMIT 1
+		),
+		(
+			SELECT DATE_ADD(Vertragsende, INTERVAL 1 DAY)	-- Vertragsbeginn = Ende alter Vertrag + 1 Tag
+				FROM Mitgliedervertrag
+					WHERE MitgliederID = ?	-- MitgliederID
+					AND Aktiv = 1
+						ORDER BY Vertragsende DESC
+						LIMIT 1
+		),				
+		?,				-- Vertragsende DATE
+		0,				-- Verlängerung BOOLEAN
+		CASE
+		    WHEN CURRENT_DATE <= Trainingsbeginn THEN 1
+		    ELSE 0
+		END,
+		0,
+		?,				-- Preisrabatt DECIMAL(6.2)
+		(
+			SELECT IntervallID
+				FROM Intervall
+					WHERE Zahlungsintervall = ?  -- Zahlungsintervall VARCHAR(20)
+					LIMIT 1
+		),
+		(
+			SELECT ZahlungID
+				FROM Zahlung
+					WHERE Zahlungsart = ?		-- Zahlungsart VARCHAR(255)
+					LIMIT 1
+		),
+		?,				-- Trainingsbeginn DATE
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- Kommentar TEXT
+		    ELSE NULL
+		END
+);
+
+-- Ändere den Status des alten MitgliederVertrag auf Verlängert
+
+UPDATE MitgliederVertrag
+	SET Verlängerung = 1
+		WHERE MitgliederID = ?
+
+-- Schließe die Neuerstellung des verlängerten MitgliederVertrag ab
+
+COMMIT;

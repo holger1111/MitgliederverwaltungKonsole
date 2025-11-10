@@ -1,0 +1,144 @@
+CREATE DATABASE Mitgliederverwaltung CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+USE Mitgliederverwaltung;
+
+CREATE TABLE Ort (
+	OrtID INT PRIMARY KEY AUTO_INCREMENT,
+	PLZ VARCHAR(5) NOT NULL,
+	Ort VARCHAR(255) NOT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Zahlungsdaten (
+	ZahlungsdatenID INT PRIMARY KEY AUTO_INCREMENT,
+	Name VARCHAR(255) NOT NULL,
+	IBAN VARCHAR(255) NOT NULL,
+	BIC VARCHAR(255) NOT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Mitglieder (
+	MitgliederID INT PRIMARY KEY AUTO_INCREMENT,
+	Vorname VARCHAR(255),
+	Nachname VARCHAR(255),
+	Geburtsdatum DATE,
+	Aktiv BOOLEAN DEFAULT FALSE COMMENT 'Gibt an, ob das Mitglied aktiv ist und trainieren darf (true/false)',
+	Straße VARCHAR(255),
+	Hausnr VARCHAR(10),
+	OrtID INT,
+	ZahlungsdatenID INT,
+	Telefon VARCHAR(255),
+	Mail VARCHAR(255),
+	FOREIGN KEY (OrtID) REFERENCES Ort(OrtID) ON DELETE CASCADE,
+	FOREIGN KEY (ZahlungsdatenID) REFERENCES Zahlungsdaten(ZahlungsdatenID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Vertrag (
+	VertragID INT PRIMARY KEY AUTO_INCREMENT,
+	Bezeichnung VARCHAR(255),
+	Laufzeit INT,
+	Grundpreis DECIMAL(6,2)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Intervall (
+	IntervallID INT PRIMARY KEY AUTO_INCREMENT,
+	Zahlungsintervall VARCHAR(20),
+	Bezeichnung VARCHAR(255)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Zahlung (
+	ZahlungID INT PRIMARY KEY AUTO_INCREMENT,
+	Zahlungsart VARCHAR(255)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE MitgliederVertrag (
+	VertragNr INT AUTO_INCREMENT,
+	MitgliederID INT,
+	VertragID INT,
+	Vertragsbeginn DATE,
+	Vertragsende DATE,
+	Verlängerung BOOLEAN DEFAULT FALSE COMMENT 'Gibt an, ob das Mitglied bereits verlängert hat (true/false)',
+	Aktiv BOOLEAN DEFAULT FALSE COMMENT 'Gibt an, ob der Vertrag aktiv ist (true/false)',
+	Gekündigt BOOLEAN DEFAULT FALSE COMMENT 'Gibt an, ob das Mitglied bereits gekündigt hat (true/false)',
+	Preisrabatt DECIMAL(6,2),
+	IntervallID INT,
+	ZahlungID INT,
+	Trainingsbeginn DATE,
+	Kommentar TEXT NULL,
+	PRIMARY KEY (VertragNr, MitgliederID, VertragID),
+	FOREIGN KEY (MitgliederID) REFERENCES Mitglieder(MitgliederID) ON DELETE CASCADE,
+	FOREIGN KEY (VertragID) REFERENCES Vertrag(VertragID) ON DELETE CASCADE,
+	FOREIGN KEY (ZahlungID) REFERENCES Zahlung(ZahlungID) ON DELETE CASCADE,
+	FOREIGN KEY (IntervallID) REFERENCES Intervall(IntervallID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Bestellung (
+	BestellungID INT PRIMARY KEY AUTO_INCREMENT,
+	MitgliederID INT,
+	Gesamtpreis DECIMAL(6,2),
+	Bestelldatum TIMESTAMP,
+	ZahlungID INT,
+	FOREIGN KEY (MitgliederID) REFERENCES Mitglieder(MitgliederID) ON DELETE CASCADE,
+	FOREIGN KEY (ZahlungID) REFERENCES Zahlung(ZahlungID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Artikel (
+	ArtikelID INT PRIMARY KEY AUTO_INCREMENT,
+	Name VARCHAR(255),
+	Einzelpreis DECIMAL(6,2),
+	Kommentar TEXT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE ArtikelBestellung (
+	BestellungID INT,
+	ArtikelID INT,
+	Menge INT,
+	Aufaddiert DECIMAL(6,2),
+	PRIMARY KEY (BestellungID, ArtikelID),
+	FOREIGN KEY (BestellungID) REFERENCES Bestellung(BestellungID) ON DELETE CASCADE,
+	FOREIGN KEY (ArtikelID) REFERENCES Artikel(ArtikelID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Kurs (
+	KursID INT PRIMARY KEY AUTO_INCREMENT,
+	Bezeichnung VARCHAR(255),
+	Kostenfrei BOOLEAN COMMENT 'Gibt an, ob der Kurs kostenlos ist (true/false)',
+	Aktiv BOOLEAN DEFAULT TRUE COMMENT 'Gibt an, ob der Kurs aktuell statt findet (true/false)',
+	Teilnehmerzahl INT,
+	Preis DECIMAL(6,2) NULL,
+	AnzahlTermine INT NULL,
+	Kommentar TEXT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Trainer (
+	TrainerID INT PRIMARY KEY AUTO_INCREMENT,
+	Vorname VARCHAR(255),
+	Nachname VARCHAR(255),
+	Kommentar TEXT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
+CREATE TABLE Kurstermin (
+	KursterminID INT PRIMARY KEY AUTO_INCREMENT,
+	KursID INT,
+	Termin DATETIME,
+	TrainerID INT,
+	Teilnehmerfrei INT,
+	Anmeldbar BOOLEAN DEFAULT TRUE COMMENT 'Gibt an, ob der Kurs noch freie Plätze hat (true/false)',
+	Aktiv BOOLEAN DEFAULT TRUE COMMENT 'Gibt an, ob der Kurstermin stattfindet (true/false)',
+	Kommentar TEXT NULL,
+	FOREIGN KEY (KursID) REFERENCES Kurs(KursID) ON DELETE CASCADE,
+	FOREIGN KEY (TrainerID) REFERENCES Trainer(TrainerID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE Kursteilnahme (
+	MitgliederID INT,
+	KursterminID INT,
+	Angemeldet BOOLEAN DEFAULT FALSE COMMENT 'Gibt an, ob das Mitglied angemeldet ist oder war (true/false)',
+	Anmeldezeit TIMESTAMP,
+	Abgemeldet BOOLEAN DEFAULT FALSE COMMENT 'Gibt an, ob das Mitglied abgemeldet ist (true/false)',
+	Abmeldezeit TIMESTAMP NULL,
+	Aktiv BOOLEAN DEFAULT FALSE COMMENT 'Gibt an, ob das Mitglied am Kurs teilnehmen kann (true/false)',
+	Kommentar TEXT NULL,
+	PRIMARY KEY (MitgliederID, KursterminID),
+	FOREIGN KEY (MitgliederID) REFERENCES Mitglieder(MitgliederID) ON DELETE CASCADE,
+	FOREIGN KEY (KursterminID) REFERENCES Kurstermin(KursterminID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

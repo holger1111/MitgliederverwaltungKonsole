@@ -1,0 +1,139 @@
+-- Kurstermin anlegen:
+
+START TRANSACTION;		-- ROLLBACK; immer zwischendrin als Option zum Abbrechen einbauen
+
+-- Prüfe Kurse KursID speichern
+
+SELECT KursID, Bezeichnung, Aktiv, Teilnehmerzahl, Kostenfrei, Preis, AnzahlTermine, Kommentar
+	FROM Kurs
+		ORDER BY KursID DESC;
+
+-- Prüfe Trainer TrainerID speichern
+
+SELECT TrainerID, Vorname, Nachname, Kommentar
+	FROM Trainer
+		ORDER BY Nachname DESC;
+
+-- Prüfe vorhandene Kurstermine
+
+SELECT kt.KursterminID, k.Bezeichnung, kt.Termin, t.Vorname, t.Nachname, t.Kommentar
+	FROM Kurstermin AS kt
+	JOIN Kurs AS k
+	ON k.KursID = kt.KursID
+	JOIN Trainer AS t
+	ON t.TrainerID = kt.TrainerID;
+
+-- -------------------------------------------------------------------------------
+
+-- Ggf unabhängigen, neuen Kurstermin erstellen
+
+INSERT INTO Kurstermin
+	VALUES
+		NULL,
+		?,				-- KursID
+		?,				-- Termin DATETIME
+		?,				-- TrainerID
+		(
+			SELECT k.Teilnehmerzahl
+				FROM Kurs AS k
+					WHERE kt.KursID = ?			-- KursID
+		),
+		1,				-- Anmeldbar
+		1,				-- Aktiv
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- Kommentar TEXT
+		    ELSE NULL
+		END
+);
+
+
+
+
+-- -------------------------------------------------------------------------------
+
+-- Ggf Kurs von aktuellster Woche für x Wochen kopieren
+-- (( for (int i = 7; i <= x * 7; i += 7) ))
+
+INSERT INTO Kurstermin
+	VALUES
+		NULL,
+		?,								-- KursID
+		(
+			SELECT DATE_ADD(
+				(
+					SELECT MAX(Termin)		-- i aus der for-Schleife
+						FROM Kurstermin
+							WHERE KursID = ?),	-- KursID
+					INTERVAL ? DAY)
+		),
+		?,								-- TrainerID
+		(
+			SELECT Teilnehmerzahl
+				FROM Kurs
+					WHERE KursID = ?			-- KursID
+		),
+		1,								-- Anmeldbar
+		1,								-- Aktiv
+		CASE
+		    WHEN ? IS NOT NULL THEN ?					-- Kommentar TEXT
+		    ELSE NULL
+		END
+);
+
+-- -------------------------------------------------------------------------------
+
+-- Ggf alle Kurse von aktuellster Woche für |x| Wochen kopieren			--		Beispiel: 2 Wochen -> x = 2
+										--		 Woche 0Montag		Dienstag			MittwochDonnerstag	Freitag				Samstag	Sonntag
+-- |i| Schleife iteriert durch die Tage einer Woche				--		i	-7	-7	-6	-6	-6	-6	-5	-4	-4	-3	-3	-3	-3	-2	-1	-1
+-- (( for (int i = - 7; i < 0; i++) ))
+
+-- ermittelt |ad| als Anzahl Kurstermine pro Tag ermitteln			--	Anzahl Kurse	1		2				0	1	1	2	2	2	2	0	1	1
+SELECT COUNT(KursterminID) AS ad						--		ad	1	1	2	2	2	2	0	1	1	2	2	2	2	0	1	1
+	FROM Kurstermin
+		WHERE Termin = DATE_SUB(
+				(
+				SELECT MAX(Termin)
+					FROM Kurstermin
+				), INTERVAL ? DAY		-- |i| aus der for-Schleife
+			);
+
+-- |j| Schleife iteriert durch die Kurse eines Tages				--			Bauchtraining	Wirbelsäule	Aquakurs	-	BBP		Cycling		Tennis		-	Babygym
+-- (( for (int j = 0; j < ad; j++) ))						--		j	0	0	0	0	1	1	-	0	0	0	0	1	1	-	0	0
+
+-- |k| Schleife iteriert durch die Wochen der |x| Verlängerung			--		x	2	2	2	2	2	2	-	2	2	2	2	2	2	-	2	2
+-- (( for (int k = 7; k <= x * 7; k += 7) ))					--		k	7	14	7	14	7	14	-	7	14	7	14	7	14	-	7	14
+
+-- Kopiert den Kurs für |x| Wochen						--		Woche	+1	+2	+1	+2	+1	+2	-	+1	+2	+1	+2	+1	+2	-	+1	+2
+
+INSERT INTO Kurstermin
+	VALUES
+		NULL,
+		?,				-- KursID
+		(
+			SELECT DATE_ADD(
+				(
+					SELECT MAX(Termin)
+						FROM Kurstermin
+							WHERE KursID = ?	-- KursID
+				),
+			INTERVAL ? DAY)		-- k aus der for-Schleife
+		),
+		?,				-- TrainerID
+		(
+			SELECT Teilnehmerzahl
+				FROM Kurs
+					WHERE KursID = ?			-- KursID
+		),
+		1,				-- Anmeldbar
+		1,				-- Aktiv
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- Kommentar TEXT
+		    ELSE NULL
+		END
+);
+
+-- -------------------------------------------------------------------------------
+
+-- Schließe die Neuerstellung der Kurstermine ab
+
+COMMIT;

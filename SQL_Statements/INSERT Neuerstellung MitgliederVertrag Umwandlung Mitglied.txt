@@ -1,0 +1,70 @@
+-- Erstellung neuer MitgliederVertrag mit Umwandlung Interessenten zu Mitgliedern:
+
+START TRANSACTION;		-- ROLLBACK; immer zwischendrin als Option zum Abbrechen einbauen
+
+-- Prüfe Person sowie Speicherung MitgliederID
+
+SELECT MitgliederID, Vorname, Nachname, Geburtsdatum, Aktiv
+	FROM Mitglieder
+	WHERE Vorname LIKE CONCAT("%", ?, "%")	-- Vorname LIKE
+	AND Nachname LIKE CONCAT("%", ?, "%")	-- Nachname LIKE
+	AND Geburtsdatum LIKE CONCAT(?, "%");	-- Geburtsjahr
+
+-- Erstellung MitgliederVertrag
+
+INSERT INTO MitgliederVertrag
+	VALUES
+		(
+		NULL,
+		?,				-- MitgliederID
+		(
+			SELECT VertragID
+				FROM Vertrag
+					WHERE Bezeichnung = ?	-- Bezeichnung
+					LIMIT 1
+		),
+		?,				-- Vertragsbeginn DATE
+		?,				-- Vertragsende DATE
+		0,				-- Verlängerung BOOLEAN
+		CASE
+		    WHEN CURRENT_DATE <= Trainingsbeginn THEN 1
+		    ELSE 0
+		END,
+		0,
+		?,				-- Preisrabatt DECIMAL(6.2)
+		(
+			SELECT IntervallID
+				FROM Intervall
+					WHERE Zahlungsintervall = ?  -- Zahlungsintervall VARCHAR(20)
+					LIMIT 1
+		),
+		(
+			SELECT ZahlungID
+				FROM Zahlung
+					WHERE Zahlungsart = ?		-- Zahlungsart VARCHAR(255)
+					LIMIT 1
+		),
+		?,				-- Trainingsbeginn DATE
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- Kommentar TEXT
+		    ELSE NULL
+		END
+);
+
+-- Umwandlung zu aktivem Mitglied
+
+UPDATE Mitglieder AS m
+	SET m.Aktiv = CASE
+		WHEN EXISTS	(
+				SELECT 1
+					FROM MitgliederVertrag AS mv
+						WHERE mv.MitgliederID = m.MitgliederID
+						AND mv.Aktiv = 1
+				) THEN 1
+				ELSE 0
+		END
+		WHERE m.MitgliederID = ?;	-- MitgliederID
+
+-- Schließe die Umwandlung zum Mitglied sowie Anlage Mitgliedsvertrag ab
+
+COMMIT;

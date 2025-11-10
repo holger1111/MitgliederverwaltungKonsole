@@ -1,0 +1,125 @@
+-- Vorbereitung Interessenten zu Mitgliedern mit Erstellung Zahlungsdaten:
+
+START TRANSACTION;		-- ROLLBACK; immer zwischendrin als Option zum Abbrechen einbauen
+
+-- Prüfe, ob Person bereits vorhanden
+
+SELECT MitgliederID, Vorname, Nachname, Geburtsdatum, Aktiv
+	FROM Mitglieder
+	WHERE Vorname LIKE CONCAT("%", ?, "%")	-- Vorname LIKE-
+	AND Nachname LIKE CONCAT("%", ?, "%")	-- Nachname LIKE
+	AND Geburtsdatum LIKE CONCAT(?, "%");	-- Geburtsjahr
+
+-- Ggf Person nicht vorhanden, dann leer neu anlegen
+
+INSERT INTO Mitglieder (MitgliederID, Aktiv)
+	VALUES (
+		NULL,
+		0
+);
+
+-- Fehlende Werte updaten, außer ZahlungsdatenID und OrtID bei nicht angelegtem Ort
+
+INSERT INTO Mitglieder (Vorname, Nachname, Geburtsdatum, Straße, Hausnr, OrtID, Telefon, Mail)
+	VALUES	(
+	    	?,				-- Vorname VARCHAR(255)
+	    	?,				-- Nachname VARCHAR(255)
+		?,				-- Geburtsdatum DATE "yyyy-mm-dd"
+		?,				-- Straße VARCHAR(255)
+		?,				-- Hausnr VARCHAR(10)
+	    	(
+	    		SELECT OrtID		-- OrtID noch nicht zwingend angelegt
+				FROM Ort
+					WHERE Ort = ?
+					LIMIT 1
+	    	),
+		?,				-- Telefon VARCHAR(255)
+		?,				-- Mail VARCHAR(255)
+		)
+		ON DUPLICATE KEY UPDATE
+			Vorname = IF (Vorname IS NULL, VALUES(Vorname), Vorname),
+			Nachname = IF (Nachname IS NULL, VALUES(Nachname), Nachname),
+			Geburtsdatum = IF (Geburtsdatum IS NULL, VALUES(Geburtsdatum), Geburtsdatum),
+			Straße =  IF (Straße IS NULL, VALUES(Straße), Straße),
+			Hausnr =  IF (Hausnr IS NULL, VALUES(Hausnr), Hausnr),
+			Telefon =  IF (Telefon IS NULL, VALUES(Telefon), Telefon),
+			Mail =  IF (Mail IS NULL, VALUES(Mail), Mail);
+
+-- MitgliederID abfragen und speichern
+
+SELECT MitgliederID
+	FROM Mitglieder
+		WHERE m.Vorname = ?		-- Vorname
+		AND m.Nachname = ?		-- Nachname
+		AND m.Geburtsdatum = ?;		-- Geburtsdatum
+
+-- Ggf Ort neu anlegen
+
+INSERT INTO Ort (PLZ, Ort)
+	VALUES
+		(
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- PLZ VARCHAR(5)
+		    ELSE NULL
+		END,
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- Ort VARCHAR(255)
+		    ELSE NULL
+		END
+);
+
+-- Ggf OrtID updaten
+
+UPDATE Mitglieder AS m
+	SET
+		m.OrtID = (
+			SELECT o.OrtID
+			FROM Ort AS o
+			WHERE o.Ort = ?			-- Ortname
+			)
+			WHERE m.MitgliederID = ?;	-- MitgliederID
+
+-- Ggf Zahlungsdaten neu anlegen
+
+INSERT INTO Zahlungsdaten (Name, IBAN, BIC)
+	VALUES
+		(
+		?,					-- Name Kontoinhaber VARCHAR(255)
+		?,					-- IBAN VARCHAR(255)
+		?					-- BIC VARCHAR(255)
+);
+
+-- ZahlungsdatenID abfragen und speichern
+
+SELECT ZahlungsdatenID
+	FROM Zahlungsdaten
+		WHERE Name = ?				-- Name Kontoinhaber VARCHAR(255)
+		AND IBAN = ?				-- IBAN VARCHAR(255)
+		AND BIC = ?;				-- BIC VARCHAR(255)
+
+-- ZahlungsdatenID zuweisen
+
+UPDATE Mitglieder
+	SET
+		ZahlungsdatenID = ?			-- ZahlungsdatenID
+			WHERE MitgliederID = ?;		-- MitgliederID
+
+-- Mitglieder und Zahlungsdaten anzeigen
+
+SELECT m.Vorname, m.Nachname, m.Geburtsdatum, m.Straße, m.Hausnr, o.PLZ, o.Ort, m.Telefon, m.Mail
+	FROM Mitglieder as m
+	JOIN Ort AS o
+	ON o.OrtID = m.OrtID
+		WHERE m.MitgliederID = ?;		-- MitgliederID
+
+SELECT zd.Name, zd.IBAN, zd.BIC
+	FROM Zahlungsdaten
+	JOIN Mitglieder AS m
+	ON m.ZahlungsdatenID = zd.ZahlungsdatenID
+		WHERE m.MitgliederID = ?;		-- MitgliederID
+
+-- Schließe die Vorbereitung der Mitgliedererstellung erfolgreich ab, jedoch noch KEIN Mitglied
+
+COMMIT;
+
+

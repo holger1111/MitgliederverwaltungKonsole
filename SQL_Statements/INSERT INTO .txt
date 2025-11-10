@@ -1,0 +1,109 @@
+INSERT INTO Kurs
+	VALUES
+		(NULL, "Bauch, Beine, Po", 1, 1, 25, NULL, NULL, "Hallenschuhe, freie Sportkleidung"),
+		(NULL, "Yoga", 1, 1, 15, NULL, NULL, "Barfüßig/Socken, lockere Kleidung, Handtuch"),
+		(NULL, "AquaCycling", 0, 1, 9, 100.00, 11, "AquaSchuhe, sichere Badekleidung"),
+		(NULL, "Wirbelsäulengymnastik", 1, 0, 15, NULL, NULL, "Lockere Kleidung, Handtuch");
+-- Trenner
+INSERT INTO Trainer
+	VALUES
+		(NULL, "Holger", "Braun", NULL),
+		(NULL, "Cecilia", "Petters", NULL);
+-- Trenner
+INSERT INTO Ort
+	VALUES
+		(NULL, "74583", "Brumhoffen"),
+		(NULL, "74584", "Cellstall"),
+		(NULL, "74585", "Dombstadt");
+-- Trenner
+INSERT INTO Vertrag
+	VALUES
+		(NULL, "12-Monat-Standard", 52, 9.5),
+		(NULL, "24-Monat-Standard", 104, 7.5),
+		(NULL, "12-Monat-Jugend", 52, 6.5),
+		(NULL, "24-Monat-Jugend", 104, 5.5);
+-- Trenner
+INSERT INTO Intervall
+	VALUES
+		(NULL, 1, "1. Tag des Monats"),
+		(NULL, 31, "Letzter Tag des Monats"),
+		(NULL, 7, "wöchentlich"),
+		(NULL, 14, "zweiwöchentlich");
+-- Trenner
+INSERT INTO Zahlung
+	VALUES
+		(NULL, "Barzahlung"),
+		(NULL, "Abbuchung");
+-- Trenner
+INSERT INTO Artikel
+	VALUES
+		(NULL, "Handtuch L", 9.99, NULL),
+		(NULL, "Handtuch XL", 14.99, NULL),
+		(NULL, "Bio-Protein-Shake", 4.5, "Special-Harvest"),
+		(NULL, "Protein-Shake", 3.5, "Plastique Nutrition"),
+		(NULL, "Kaffee schwarz", 4.5, NULL),
+		(NULL, "Kaffee Milch", 5.0, NULL),
+		(NULL, "Kaffee Hafermilch", 5.5, NULL);
+-- Trenner
+INSERT INTO Zahlungsdaten
+	VALUES
+		(NULL, "Edgar Hönness", "DE422020000045244568", "SFOLDEC1110"),
+		(NULL, "Celicia Störm", "DE431046000375420923", "HOBMDEF1028"),
+		(NULL, "Anne-Liese Kreier", "DE418468000061242957", "IPOADEA3846"),
+		(NULL, "Markus Mayer", "DE420923932000658376", "SFOLDEC1110");
+
+INSERT INTO Mitglieder
+	VALUES
+		(NULL, "Edgar", "Hönness", "1957-03-13", 1, "Benzstraße", "32", 1, 1, "04931038254382", "e.hoenness@merzedes-bens.de"),
+		(NULL, "Celicia", "Störm", "1987-05-24", 1, "Seeweg", "3", 2, 2, "0493240593543", "celistorm@gmy.de"),
+		(NULL, "Lisa-Marie", "Störm", "2009-1-31", 1, "Seeweg", "3", 2, 2, "0494863492135", "princesslie@alo-mail.de"),
+		(NULL, "Anne-Liese", "Kreier", "2008-12-02", 1, "Auenbachstraße", "109", 2, 3, "049573489128", "lakreier@kreier-professionals.de"),
+		(NULL, "Markus", "Mayer", "1990-07-17", 1, "Bachstraße", "4", 3, 4, "0498576432973674", "mm@inkasso-stolz.de");
+-- Trenner
+INSERT INTO Bestellung
+	VALUES
+		(NULL, 3, 19.49, "2025-10-27 12:30:12", 1),
+		(NULL, 4, 4.5, "2025-10-27 12:31:54", 1),
+		(NULL, 2, 9.5, "2025-10-27 12:43:24", 2),
+		(NULL, 1, 9.99, "2025-10-27 12:59:59", 2);
+
+INSERT INTO ArtikelBestellung
+	VALUES
+		(1, 2, 1, 14.99),
+		(1, 4, 1, 4.5),
+		(2, 4, 1, 4.5),
+		(3, 5, 1, 4.5),
+		(3, 6, 1, 5.0),
+		(4, 1, 1, 9.99);
+-- Trenner
+INSERT INTO MitgliederVertrag
+	VALUES
+		(NULL, 1, 2, "2024-10-12", "2026-10-13", 1, 1, 0, 2.50, 3, 2, "2024-09-12", "Vereinsfunktionär, bekommt extra Rabatt von 2,50€"),
+		(NULL, 2, 1, "2024-12-31", "2026-01-01", 0, 1, 0, NULL, 4, 2, "2024-12-01", "Mutter von Lisa-Marie Störm"),
+		(NULL, 3, 3, "2024-12-31", "2026-01-01", 0, 1, 0, 1.50, 4, 2, "2024-12-01", "Tochter von Celicia Störm, hat Anne-Liese Kreier geworben, daher 1,50 € Rabatt"),
+		(NULL, 4, 3, "2025-02-15", "2026-02-16", 0, 1, 0, NULL, 4, 2, "2025-02-01", "Geworben von Celicia Störm"),
+		(NULL, 5, 1, "2025-10-26", "2026-10-27", 0, 1, 0, NULL, 4, 1, "2025-10-06", NULL);
+-- Trenner
+INSERT INTO Kurstermin
+	VALUES
+		(NULL, 1, "2025-10-27 18:00:00", 1, 11, 1, 1, NULL),
+		(NULL, 2, "2025-10-28 18:30:00", 2, 3, 1, 1, NULL),
+		(NULL, 3, "2025-10-28 19:45:00", 2, 0, 0, 1, NULL),
+		(NULL, 4, "2025-10-29 10:00:00", 1, 2, 1, 1, NULL),
+		(NULL, 1, "2025-11-03 18:00:00", 1, 21, 1, 1, NULL),
+		(NULL, 2, "2025-11-04 18:30:00", 2, 13, 1, 1, NULL),
+		(NULL, 3, "2025-11-04 19:45:00", 2, 0, 0, 1, NULL),
+		(NULL, 4, "2025-11-05 10:00:00", 1, 6, 1, 1, NULL);
+
+INSERT INTO Kursteilnahme
+	VALUES
+		(5, 3, 1, "2025-10-18 00:05:23", 0, NULL, 1, NULL),
+		(2, 1, 1, "2025-10-25 01:32:39", 0, NULL, 1, NULL),
+		(2, 5, 1, "2025-10-25 01:33:15", 0, NULL, 1, NULL),
+		(5, 7, 1, "2025-10-26 00:03:39", 0, NULL, 1, NULL),
+		(5, 4, 1, "2025-10-26 00:05:12", 1, "2025-10-27 12:03:48", 0, "Versehentlich angemeldet"),
+		(3, 2, 1, "2025-10-26 14:34:22", 0, NULL, 1, NULL),
+		(3, 6, 1, "2025-10-26 14:36:45", 0, NULL, 1, NULL),
+		(4, 2, 1, "2025-10-26 14:37:02", 0, NULL, 1, NULL),
+		(4, 6, 1, "2025-10-26 14:39:21", 0, NULL, 1, NULL);
+-- Trenner

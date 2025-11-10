@@ -1,0 +1,89 @@
+-- Erstellung neuer Interessenten/Besucher:
+
+START TRANSACTION;		-- ROLLBACK; immer zwischendrin als Option zum Abbrechen einbauen
+
+-- Prüfe, ob Person bereits vorhanden
+
+SELECT MitgliederID, Vorname, Nachname, Geburtsdatum, Aktiv
+	FROM Mitglieder
+	WHERE Vorname LIKE CONCAT("%", ?, "%")	-- Vorname LIKE
+	AND Nachname LIKE CONCAT("%", ?, "%")	-- Nachname LIKE
+	AND Geburtsdatum LIKE CONCAT(?, "%");	-- Geburtsjahr
+
+-- Person nicht vorhanden, dann neu anlegen
+
+INSERT INTO Mitglieder (Vorname, Nachname, Geburtsdatum, Straße, Hausnr, OrtID, Telefon, Mail)
+	VALUES	(
+	    CASE
+		WHEN ? IS NOT NULL THEN ?	-- Vorname VARCHAR(255)
+		ELSE NULL
+	    END,
+	    CASE
+		WHEN ? IS NOT NULL THEN ?	-- Nachname VARCHAR(255)
+		ELSE NULL
+	    END,
+	    CASE
+		WHEN ? IS NOT NULL THEN ?	-- Geburtsdatum DATE "yyyy-mm-dd"
+		ELSE NULL
+	    END,
+	    CASE
+		WHEN ? IS NOT NULL THEN ?	-- Straße VARCHAR(255)
+		ELSE NULL
+	    END,
+	    CASE
+		WHEN ? IS NOT NULL THEN ?	-- Hausnr VARCHAR(10)
+		ELSE NULL
+	    END,
+	    (
+	    SELECT OrtID			-- OrtID noch nicht zwingend bekannt
+		FROM Ort
+			WHERE Ort = ?
+				LIMIT 1
+	    ),
+	    CASE
+		WHEN ? IS NOT NULL THEN ?	-- Telefon VARCHAR(255)
+		ELSE NULL
+	    END,
+	    CASE
+		WHEN ? IS NOT NULL THEN ?	-- Mail VARCHAR(255)
+		ELSE NULL
+	    END
+);
+
+-- Ggf Ort neu anlegen
+
+INSERT INTO Ort (PLZ, Ort)
+	VALUES
+		(
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- PLZ VARCHAR(5)
+		    ELSE NULL
+		END,
+		CASE
+		    WHEN ? IS NOT NULL THEN ?	-- Ort VARCHAR(255)
+		    ELSE NULL
+		END
+);
+
+-- Ggf OrtID updaten
+
+UPDATE Mitglieder AS m
+	SET
+		m.OrtID = (
+			SELECT o.OrtID
+			FROM Ort AS o
+			WHERE o.Ort = ?			-- Ortname
+			)
+			WHERE m.Vorname = ?		-- Vorname
+			AND m.Nachname = ?		-- Nachname
+			AND m.Geburtsdatum = ?;		-- Geburtsdatum
+
+
+-- Schließe die Interessentenerstellung erfolgreich ab
+
+COMMIT;
+
+-- Anzeigen des gerade erstellten Interessenten
+
+SELECT * FROM Mitglieder WHERE MitgliederID = LAST_INSERT_ID();
+

@@ -1,0 +1,70 @@
+-- Erstellung neuer Artikel:
+
+INSERT INTO Artikel
+	VALUES	(
+		NULL,		-- TrainerID
+		?,		-- Bezeichnung/Artikelname VARCHAR(255)
+		?,		-- Einzelpreis DECIMAL(6.2)
+		?		-- Kommentar TEXT
+);
+
+-- ---------------------
+
+-- Erstellung neuer Trainer:
+
+INSERT INTO Trainer
+	VALUES	(
+		NULL,		-- TrainerID
+		?,		-- Vorname VARCHAR(255)
+		?,		-- Nachname VARCHAR(255)
+		?		-- Kommentar TEXT
+);
+
+-- ---------------------
+
+-- Erstellung neuer Kurse:
+
+INSERT INTO Kurs
+	VALUES	(
+		NULL,		-- KursID
+		?,		-- Bezeichnung VARCHAR(255)
+		?,		-- Kostenfrei BOOLEAN 0/1
+		?,		-- Aktiv BOOLEAN 0/1
+		?,		-- max. Teilnehmerzahl INT
+		?,		-- Preis DECIMAL(5.2) NULL
+		?,		-- AnzahlTermine INT NULL
+		?		-- Kommentar TEXT
+);
+
+-- ----------------------
+
+-- Erstellung neuer Zahlungsmöglichkeiten:
+
+INSERT INTO Zahlung
+	VALUES	(
+		NULL,		-- ZahlungID
+		?		-- Zahlungsart VARCHAR(255)
+);
+
+-- ----------------------
+
+-- Erstellung neuer Vertragsarten:
+
+INSERT INTO Vertrag
+	VALUES	(
+		NULL,		-- VertragID
+		?,		-- Bezeichnung VARCHAR(255)
+		?,		-- Laufzeit INT
+		?		-- Grundpreis DECIMAL(6.2)
+);
+
+-- ----------------------
+
+-- Erstellung neuer Zahlungsintervalle:
+
+INSERT INTO Intervall
+	VALUES	(
+		NULL,		-- IntervallID
+		?,		-- Zahlungsintervall VARCHAR(20)
+		?		-- Bezeichnung VARCHAR(255)
+);

@@ -1,0 +1,15 @@
+-- Ort anlegen:
+
+-- Orte anzeigen lassen
+
+SELECT OrtID, PLZ, Ort
+	FROM Ort;
+
+-- Neuen Ort einfügen
+
+INSERT INTO Ort
+	Values	(
+		NULL,
+		?,		-- PLZ VARCHAR(5)
+		?		-- Ort VARCHAR(255)
+);

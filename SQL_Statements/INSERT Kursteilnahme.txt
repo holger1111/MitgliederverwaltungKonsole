@@ -1,0 +1,49 @@
+-- Anmeldung Kurs:
+
+START TRANSACTION;		-- ROLLBACK; immer zwischendrin als Option zum Abbrechen einbauen
+
+-- Prüfe MitgliederID-- --Danach Speicherung der MitgliederID für den laufenden Prozess
+
+SELECT Vorname, Nachname
+	FROM Mitglieder
+	WHERE MitgliederID = ?;	--MitgliederID des Kunden
+
+-- Frage Kurstermin ab-- --Speicherung der KursterminID von ausgewähltem Kurs
+
+SELECT k.Bezeichnung, kt.KursterminID, kt.Termin, kt.Teilnehmerfrei, k.Teilnehmerzahl, kt.Anmeldbar, k.Kostenfrei
+	FROM Kurstermine AS kt
+	JOIN Kurs AS k
+	ON k.KursID = kt.KursID
+	WHERE k.Bezeichnung LIKE CONCAT("%", ?, "%")	-- Bezeichnung Kurs
+	AND kt.Anmelbar = 1
+	AND Aktiv = 1;
+
+-- Erstellung der Kursteilnahme
+
+INSERT INTO Kursteilnahme
+	VALUES (
+		?,		-- MitgliederID
+		?,		-- KursteilnahmeID
+		1,		-- Angemeldet
+		CURRENT_TIME,	-- Zeitstempel
+		0,		-- Nicht Abgemeldet
+		NULL,		-- Nicht Abgemeldet, daher kein Zeitstempel
+		1,		-- Kursteilnahme ist aktiv, d.h. Kurs ist in Zukunft
+		NULL);		-- Kein Kommentar
+
+-- Update freie Kursplätze
+
+UPDATE Kurstermin
+	SET 	Teilnehmerfrei = CASE
+		WHEN Anmeldbar = 1 THEN Teilnehmerfrei -1
+		ELSE Teilnehmerfrei
+	END,
+		Anmeldbar = Case
+		WHEN Teilnehmerfrei - 1 <= 0 AND Anmeldbar = 1 THEN 0
+		ELSE Anmeldbar
+	END
+	WHERE KursterminID = ?;
+
+-- Schließe die Kursanmeldung erfolgreich ab
+
+COMMIT;
