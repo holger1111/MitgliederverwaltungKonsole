@@ -94,6 +94,27 @@ public class RolleDAO extends BaseDAO<Rolle> {
         return list;
     }
 
+    public List<Rolle> searchAllAttributes(String searchTerm) throws SQLException {
+        List<Rolle> result = new ArrayList<>();
+        String query = 
+            "SELECT * FROM Rolle " +
+            "WHERE CAST(RolleID AS CHAR) LIKE ? " +
+            "OR Bezeichnung LIKE ? " +
+            "OR Kommentar LIKE ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            String like = "%" + searchTerm + "%";
+            stmt.setString(1, like);
+            stmt.setString(2, like);
+            stmt.setString(3, like);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapRowToRolle(rs));
+                }
+            }
+        }
+        return result;
+    }
+    
     private Rolle mapRowToRolle(ResultSet rs) throws SQLException {
         Rolle rolle = new Rolle();
         rolle.setRolleID(rs.getInt("RolleID"));

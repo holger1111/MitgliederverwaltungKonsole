@@ -61,7 +61,9 @@ public class VertragService extends BaseService {
 		while (!exit) {
 			System.out.println("==== Vertragsverwaltung ====");
 			System.out.println("1 - Neukunde anlegen");
-			System.out.println("2 - Zurück zum Hauptmenü");
+			System.out.println("2 - Vertrag verlängern");
+			System.out.println("3 - Vertrag kündigen");
+			System.out.println("4 - Zurück zum Hauptmenü");
 			System.out.print("Bitte wählen: ");
 			String eingabe = scanner.nextLine();
 
@@ -74,6 +76,10 @@ public class VertragService extends BaseService {
 					e.printStackTrace();
 				}
 			case "2":
+			case "3":
+				System.out.println("WIP");
+				break;
+			case "4":
 				exit = true;
 				break;
 			default:

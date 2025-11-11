@@ -118,6 +118,26 @@ public class MitgliederDAO extends BaseDAO<Mitglieder> {
 		return mitglied.getMitgliederID();
 	}
 
+	public List<Mitglieder> findAll() throws SQLException {
+		List<Mitglieder> list = new ArrayList<>();
+		String sql = "SELECT * FROM Mitglieder";
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = connection.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				list.add(mapRowToMitglieder(rs));
+			}
+		} finally {
+			if (rs != null)
+				rs.close();
+			if (ps != null)
+				ps.close();
+		}
+		return list;
+	}
+
 	private Mitglieder mapRowToMitglieder(ResultSet rs) throws SQLException {
 		Mitglieder mitglied = new Mitglieder();
 		mitglied.setMitgliederID(rs.getInt("MitgliederID"));

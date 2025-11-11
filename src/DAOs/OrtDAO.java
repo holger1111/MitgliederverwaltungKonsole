@@ -132,6 +132,32 @@ public class OrtDAO extends BaseDAO<Ort> {
         return null;
     }
 
+    public List<Ort> findAll() throws SQLException {
+        List<Ort> list = new ArrayList<>();
+        String sql = "SELECT * FROM Ort";
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapRowToOrt(rs));
+            }
+        } finally {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+        }
+        return list;
+    }
+
+    private Ort mapRowToOrt(ResultSet rs) throws SQLException {
+        Ort o = new Ort();
+        o.setOrtID(rs.getInt("OrtID"));
+        o.setPLZ(rs.getString("PLZ"));
+        o.setOrt(rs.getString("Ort"));
+        return o;
+    }
+
     // Override
     @Override
     public void insert(Ort entity)

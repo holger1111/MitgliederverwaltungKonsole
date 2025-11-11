@@ -11,173 +11,234 @@ import Objekte.Zahlungsdaten;
 
 public class MitarbeiterDAO extends BaseDAO<Mitarbeiter> {
 
-    private final OrtDAO ortDAO;
-    private final ZahlungsdatenDAO zahlungsdatenDAO;
-    private final BenutzerDAO benutzerDAO;
+	private final OrtDAO ortDAO;
+	private final ZahlungsdatenDAO zahlungsdatenDAO;
+	private final BenutzerDAO benutzerDAO;
 
-    public MitarbeiterDAO(Connection connection) {
-        super(connection);
-        this.ortDAO = new OrtDAO(connection);
-        this.zahlungsdatenDAO = new ZahlungsdatenDAO(connection);
-        this.benutzerDAO = new BenutzerDAO(connection);
-    }
+	public MitarbeiterDAO(Connection connection) {
+		super(connection);
+		this.ortDAO = new OrtDAO(connection);
+		this.zahlungsdatenDAO = new ZahlungsdatenDAO(connection);
+		this.benutzerDAO = new BenutzerDAO(connection);
+	}
 
-    @Override
-    public void insert(Mitarbeiter mitarbeiter) throws SQLException {
-        String sql = "INSERT INTO Mitarbeiter (Vorname, Nachname, Geburtsdatum, Straße, Hausnr, OrtID, ZahlungsdatenID, Mail, BenutzerID) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, mitarbeiter.getVorname());
-            ps.setString(2, mitarbeiter.getNachname());
-            ps.setString(3, mitarbeiter.getGeburtsdatum());
-            ps.setString(4, mitarbeiter.getStraße());
-            ps.setString(5, mitarbeiter.getHausnr());
-            ps.setInt(6, mitarbeiter.getOrt() != null ? mitarbeiter.getOrt().getOrtID() : 0);
-            ps.setInt(7, mitarbeiter.getZahlungsdaten() != null ? mitarbeiter.getZahlungsdaten().getZahlungsdatenID() : 0);
-            ps.setString(8, mitarbeiter.getMail());
-            ps.setInt(9, mitarbeiter.getBenutzer() != null ? mitarbeiter.getBenutzer().getBenutzerID() : 0);
-            ps.executeUpdate();
+	@Override
+	public void insert(Mitarbeiter mitarbeiter) throws SQLException {
+		String sql = "INSERT INTO Mitarbeiter (Vorname, Nachname, Geburtsdatum, Straße, Hausnr, OrtID, ZahlungsdatenID, Mail, BenutzerID) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			ps.setString(1, mitarbeiter.getVorname());
+			ps.setString(2, mitarbeiter.getNachname());
+			ps.setString(3, mitarbeiter.getGeburtsdatum());
+			ps.setString(4, mitarbeiter.getStraße());
+			ps.setString(5, mitarbeiter.getHausnr());
+			ps.setInt(6, mitarbeiter.getOrt() != null ? mitarbeiter.getOrt().getOrtID() : 0);
+			ps.setInt(7,
+					mitarbeiter.getZahlungsdaten() != null ? mitarbeiter.getZahlungsdaten().getZahlungsdatenID() : 0);
+			ps.setString(8, mitarbeiter.getMail());
+			ps.setInt(9, mitarbeiter.getBenutzer() != null ? mitarbeiter.getBenutzer().getBenutzerID() : 0);
+			ps.executeUpdate();
 
-            rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                mitarbeiter.setMitarbeiterID(rs.getInt(1));
-            }
-        } finally {
-            closeResources(rs, ps);
-        }
-    }
+			rs = ps.getGeneratedKeys();
+			if (rs.next()) {
+				mitarbeiter.setMitarbeiterID(rs.getInt(1));
+			}
+		} finally {
+			closeResources(rs, ps);
+		}
+	}
 
-    @Override
-    public Mitarbeiter findById(int id) throws SQLException {
-        String sql = "SELECT * FROM Mitarbeiter WHERE MitarbeiterID = ?";
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = connection.prepareStatement(sql);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapRowToMitarbeiter(rs);
-            }
-        } finally {
-            closeResources(rs, ps);
-        }
-        return null;
-    }
+	@Override
+	public Mitarbeiter findById(int id) throws SQLException {
+		String sql = "SELECT * FROM Mitarbeiter WHERE MitarbeiterID = ?";
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = connection.prepareStatement(sql);
+			ps.setInt(1, id);
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				return mapRowToMitarbeiter(rs);
+			}
+		} finally {
+			closeResources(rs, ps);
+		}
+		return null;
+	}
 
-    @Override
-    public void update(Mitarbeiter mitarbeiter) throws SQLException {
-        String sql = "UPDATE Mitarbeiter SET Vorname=?, Nachname=?, Geburtsdatum=?, Straße=?, Hausnr=?, OrtID=?, ZahlungsdatenID=?, Mail=?, BenutzerID=? WHERE MitarbeiterID=?";
-        PreparedStatement ps = null;
-        try {
-            ps = connection.prepareStatement(sql);
-            ps.setString(1, mitarbeiter.getVorname());
-            ps.setString(2, mitarbeiter.getNachname());
-            ps.setString(3, mitarbeiter.getGeburtsdatum());
-            ps.setString(4, mitarbeiter.getStraße());
-            ps.setString(5, mitarbeiter.getHausnr());
-            ps.setInt(6, mitarbeiter.getOrt() != null ? mitarbeiter.getOrt().getOrtID() : 0);
-            ps.setInt(7, mitarbeiter.getZahlungsdaten() != null ? mitarbeiter.getZahlungsdaten().getZahlungsdatenID() : 0);
-            ps.setString(8, mitarbeiter.getMail());
-            ps.setInt(9, mitarbeiter.getBenutzer() != null ? mitarbeiter.getBenutzer().getBenutzerID() : 0);
-            ps.setInt(10, mitarbeiter.getMitarbeiterID());
-            ps.executeUpdate();
-        } finally {
-            closeResources(null, ps);
-        }
-    }
+	@Override
+	public void update(Mitarbeiter mitarbeiter) throws SQLException {
+		String sql = "UPDATE Mitarbeiter SET Vorname=?, Nachname=?, Geburtsdatum=?, Straße=?, Hausnr=?, OrtID=?, ZahlungsdatenID=?, Mail=?, BenutzerID=? WHERE MitarbeiterID=?";
+		PreparedStatement ps = null;
+		try {
+			ps = connection.prepareStatement(sql);
+			ps.setString(1, mitarbeiter.getVorname());
+			ps.setString(2, mitarbeiter.getNachname());
+			ps.setString(3, mitarbeiter.getGeburtsdatum());
+			ps.setString(4, mitarbeiter.getStraße());
+			ps.setString(5, mitarbeiter.getHausnr());
+			ps.setInt(6, mitarbeiter.getOrt() != null ? mitarbeiter.getOrt().getOrtID() : 0);
+			ps.setInt(7,
+					mitarbeiter.getZahlungsdaten() != null ? mitarbeiter.getZahlungsdaten().getZahlungsdatenID() : 0);
+			ps.setString(8, mitarbeiter.getMail());
+			ps.setInt(9, mitarbeiter.getBenutzer() != null ? mitarbeiter.getBenutzer().getBenutzerID() : 0);
+			ps.setInt(10, mitarbeiter.getMitarbeiterID());
+			ps.executeUpdate();
+		} finally {
+			closeResources(null, ps);
+		}
+	}
 
-    @Override
-    public void delete(int id) throws SQLException {
-        String sql = "DELETE FROM Mitarbeiter WHERE MitarbeiterID = ?";
-        PreparedStatement ps = null;
-        try {
-            ps = connection.prepareStatement(sql);
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } finally {
-            closeResources(null, ps);
-        }
-    }
+	@Override
+	public void delete(int id) throws SQLException {
+		String sql = "DELETE FROM Mitarbeiter WHERE MitarbeiterID = ?";
+		PreparedStatement ps = null;
+		try {
+			ps = connection.prepareStatement(sql);
+			ps.setInt(1, id);
+			ps.executeUpdate();
+		} finally {
+			closeResources(null, ps);
+		}
+	}
 
-    public List<Mitarbeiter> findAll() throws SQLException {
-        String sql = "SELECT * FROM Mitarbeiter";
-        List<Mitarbeiter> list = new ArrayList<>();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = connection.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapRowToMitarbeiter(rs));
-            }
-        } finally {
-            closeResources(rs, ps);
-        }
-        return list;
-    }
+	public List<Mitarbeiter> findAll() throws SQLException {
+		String sql = "SELECT * FROM Mitarbeiter";
+		List<Mitarbeiter> list = new ArrayList<>();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = connection.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				list.add(mapRowToMitarbeiter(rs));
+			}
+		} finally {
+			closeResources(rs, ps);
+		}
+		return list;
+	}
 
-    public List<Mitarbeiter> searchAllAttributes(String searchTerm) throws SQLException {
-        List<Mitarbeiter> result = new ArrayList<>();
-        String sql = "SELECT * FROM Mitarbeiter WHERE "
-                + "LOWER(Vorname) LIKE ? OR LOWER(Nachname) LIKE ? "
-                + "OR CAST(MitarbeiterID AS CHAR) LIKE ? "
-                + "OR LOWER(Mail) LIKE ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            String like = "%" + searchTerm.toLowerCase() + "%";
-            ps.setString(1, like);
-            ps.setString(2, like);
-            ps.setString(3, like);
-            ps.setString(4, like);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                result.add(mapRowToMitarbeiter(rs));
-            }
-        }
-        return result;
-    }
+	public List<Mitarbeiter> searchAllAttributes(String searchTerm) throws SQLException {
+		List<Mitarbeiter> result = new ArrayList<>();
+		String sql = "SELECT * FROM Mitarbeiter WHERE " + "LOWER(Vorname) LIKE ? OR LOWER(Nachname) LIKE ? "
+				+ "OR CAST(MitarbeiterID AS CHAR) LIKE ? " + "OR LOWER(Mail) LIKE ?";
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+			String like = "%" + searchTerm.toLowerCase() + "%";
+			ps.setString(1, like);
+			ps.setString(2, like);
+			ps.setString(3, like);
+			ps.setString(4, like);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				result.add(mapRowToMitarbeiter(rs));
+			}
+		}
+		return result;
+	}
 
-    private Mitarbeiter mapRowToMitarbeiter(ResultSet rs) throws SQLException {
-        Mitarbeiter mitarbeiter = new Mitarbeiter();
-        mitarbeiter.setMitarbeiterID(rs.getInt("MitarbeiterID"));
-        mitarbeiter.setVorname(rs.getString("Vorname"));
-        mitarbeiter.setNachname(rs.getString("Nachname"));
-        mitarbeiter.setGeburtsdatum(rs.getString("Geburtsdatum"));
-        mitarbeiter.setStraße(rs.getString("Straße"));
-        mitarbeiter.setHausnr(rs.getString("Hausnr"));
+	public List<Mitarbeiter> findByOrtId(int ortId) throws SQLException {
+		List<Mitarbeiter> result = new ArrayList<>();
+		String query = "SELECT * FROM Mitarbeiter WHERE OrtID = ?";
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+			stmt.setInt(1, ortId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					result.add(mapRowToMitarbeiter(rs));
+				}
+			}
+		}
+		return result;
+	}
 
-        // Ort über OrtID holen
-        int ortID = rs.getInt("OrtID");
-        Ort ort = null;
-        try {
-            ort = ortID > 0 ? ortDAO.findById(ortID) : null;
-        } catch (Exception ex) {
-            ort = null;
-        }
-        mitarbeiter.setOrt(ort);
+	public List<Mitarbeiter> findByZahlungsdatenId(int zahlungsdatenId) throws SQLException {
+		List<Mitarbeiter> result = new ArrayList<>();
+		String query = "SELECT * FROM Mitarbeiter WHERE ZahlungsdatenID = ?";
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+			stmt.setInt(1, zahlungsdatenId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					result.add(mapRowToMitarbeiter(rs));
+				}
+			}
+		}
+		return result;
+	}
 
-        // Zahlungsdaten und Benutzer
-        int zahlungsdatenID = rs.getInt("ZahlungsdatenID");
-        int benutzerID = rs.getInt("BenutzerID");
-        Zahlungsdaten zahlungsdaten = null;
-        Benutzer benutzer = null;
-        try {
-            zahlungsdaten = zahlungsdatenID > 0 ? zahlungsdatenDAO.findById(zahlungsdatenID) : null;
-        } catch (Exception ex) {
-            zahlungsdaten = null;
-        }
-        try {
-            benutzer = benutzerID > 0 ? benutzerDAO.findById(benutzerID) : null;
-        } catch (Exception ex) {
-            benutzer = null;
-        }
-        mitarbeiter.setZahlungsdaten(zahlungsdaten);
-        mitarbeiter.setBenutzer(benutzer);
+	public List<Mitarbeiter> findByBenutzerId(int benutzerId) throws SQLException {
+		List<Mitarbeiter> result = new ArrayList<>();
+		String query = "SELECT * FROM Mitarbeiter WHERE BenutzerID = ?";
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+			stmt.setInt(1, benutzerId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					result.add(mapRowToMitarbeiter(rs));
+				}
+			}
+		}
+		return result;
+	}
 
-        mitarbeiter.setMail(rs.getString("Mail"));
-        return mitarbeiter;
-    }
+	public List<Mitarbeiter> findByRolleId(int rolleId) throws SQLException {
+		List<Mitarbeiter> result = new ArrayList<>();
+		String query = "SELECT m.* FROM Mitarbeiter m JOIN Benutzer b ON m.BenutzerID = b.BenutzerID WHERE b.RolleID = ?";
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+			stmt.setInt(1, rolleId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					result.add(mapRowToMitarbeiter(rs));
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Hilfsmethode zum Zuordnen einer Datenbankzeile zum Mitarbeiter-Objekt
+	 */
+
+	private Mitarbeiter mapRowToMitarbeiter(ResultSet rs) throws SQLException {
+		Mitarbeiter mitarbeiter = new Mitarbeiter();
+		mitarbeiter.setMitarbeiterID(rs.getInt("MitarbeiterID"));
+		mitarbeiter.setVorname(rs.getString("Vorname"));
+		mitarbeiter.setNachname(rs.getString("Nachname"));
+		mitarbeiter.setGeburtsdatum(rs.getString("Geburtsdatum"));
+		mitarbeiter.setStraße(rs.getString("Straße"));
+		mitarbeiter.setHausnr(rs.getString("Hausnr"));
+		mitarbeiter.setAktiv(rs.getInt("Aktiv") == 1);
+		// Ort über OrtID holen
+		int ortID = rs.getInt("OrtID");
+		Ort ort = null;
+		try {
+			ort = ortID > 0 ? ortDAO.findById(ortID) : null;
+		} catch (Exception ex) {
+			ort = null;
+		}
+		mitarbeiter.setOrt(ort);
+
+		// Zahlungsdaten und Benutzer
+		int zahlungsdatenID = rs.getInt("ZahlungsdatenID");
+		mitarbeiter.setTelefon(rs.getString("Telefon"));
+		int benutzerID = rs.getInt("BenutzerID");
+		Zahlungsdaten zahlungsdaten = null;
+		Benutzer benutzer = null;
+		try {
+			zahlungsdaten = zahlungsdatenID > 0 ? zahlungsdatenDAO.findById(zahlungsdatenID) : null;
+		} catch (Exception ex) {
+			zahlungsdaten = null;
+		}
+		try {
+			benutzer = benutzerID > 0 ? benutzerDAO.findById(benutzerID) : null;
+		} catch (Exception ex) {
+			benutzer = null;
+		}
+		mitarbeiter.setZahlungsdaten(zahlungsdaten);
+		mitarbeiter.setBenutzer(benutzer);
+
+		mitarbeiter.setMail(rs.getString("Mail"));
+		return mitarbeiter;
+	}
 }
