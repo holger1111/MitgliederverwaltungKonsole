@@ -5,12 +5,12 @@ import java.util.Objects;
 
 import Helper.Datum;
 import Helper.StripEntry;
-import Validator.BooleanValidator;
+import OUTDATED.OUT_BooleanValidator;
+import OUTDATED.OUT_StringValidator;
 import Validator.CurrencyValidator;
 import Validator.DiscountValidator;
 import Validator.EndDateValidator;
 import Validator.PaymentValidator;
-import Validator.StringValidator;
 
 public class MitgliederVertrag {
     private int vertragNr;
@@ -146,12 +146,12 @@ public class MitgliederVertrag {
         PaymentValidator paymentValidator = new PaymentValidator(zahlung, mitglied);
         paymentValidator.validate(this);
 
-        BooleanValidator boolValidator = new BooleanValidator();
+        OUT_BooleanValidator boolValidator = new OUT_BooleanValidator();
         boolValidator.validate(this.aktiv);
         boolValidator.validate(this.gekündigt);
         boolValidator.validate(this.verlängerung);
 
-        StringValidator stringValidator = new StringValidator();
-        stringValidator.checkLength(this.kommentar, "Kommentar", 0, 500);
+        OUT_StringValidator oUT_StringValidator = new OUT_StringValidator();
+        oUT_StringValidator.checkLength(this.kommentar, "Kommentar", 0, 500);
     }
 }

@@ -1,12 +1,13 @@
 package Validator;
 
 import Exception.DateException;
+import Exception.TimeException;
 import Helper.DatumHelper;
 
 public class DateValidator extends BaseValidator<Object> {
 
     @Override
-    public void validate(Object obj) throws Exception {
+    public void validate(Object obj) throws DateException, TimeException {
         errors.clear();
 
         if (!(obj instanceof String)) {

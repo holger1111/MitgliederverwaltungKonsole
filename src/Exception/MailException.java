@@ -1,9 +1,9 @@
 package Exception;
 
-public class EMailException extends StringException {
+public class MailException extends StringException {
     private static final long serialVersionUID = 1L;
 
-    public EMailException(String message) {
+    public MailException(String message) {
         super(message);
     }
 }

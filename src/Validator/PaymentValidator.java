@@ -22,9 +22,9 @@ public class PaymentValidator extends BaseValidator<MitgliederVertrag> {
         // Prüfe Zahlungsart "Abbuchung" ODER "SEPA-Lastschrift"
         String zahlungsart = zahlung.getZahlungsart();
         if (zahlungsart == null || 
-            (!zahlungsart.equalsIgnoreCase("Abbuchung") && 
+            (!zahlungsart.equalsIgnoreCase("Überweisung") && 
              !zahlungsart.equalsIgnoreCase("SEPA-Lastschrift"))) {
-            String msg = "Zahlungsart muss 'Abbuchung' oder 'SEPA-Lastschrift' sein, ist aber '" + zahlungsart + "'";
+            String msg = "Zahlungsart muss 'Überweisung' oder 'SEPA-Lastschrift' sein, ist aber '" + zahlungsart + "'";
             errors.add(msg);
             throw new PayException(msg);
         }

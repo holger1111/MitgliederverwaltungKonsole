@@ -5,8 +5,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exception.BooleanException;
 import Exception.DataIsNullException;
+import Exception.DateException;
+import Exception.DiscountException;
+import Exception.IntException;
 import Exception.NotAllNecessaryDataEnteredException;
+import Exception.StringException;
+import Exception.TimeException;
 import Exception.TooLongException;
 import Exception.TooShortException;
 
@@ -16,7 +22,7 @@ public abstract class BaseValidator<T> {
     protected List<String> errors = new ArrayList<>();
 
     // Validierungsmethode, kann beliebige Exceptions werfen
-    public abstract void validate(T obj) throws Exception;
+    public abstract void validate(T obj) throws Exception, StringException, IntException, DateException, TimeException, DiscountException, BooleanException;
 
     // Ist die Eingabe gültig?
     public boolean isValid() {

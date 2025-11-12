@@ -13,7 +13,7 @@ public class DiscountValidator extends BaseValidator<MitgliederVertrag> {
     }
 
     @Override
-    public void validate(MitgliederVertrag mv) throws Exception {
+    public void validate(MitgliederVertrag mv) throws DiscountException {
         Double rabatt = mv.getPreisrabatt();
         Double grundpreis = vertrag.getGrundpreis();
         if (rabatt == null) rabatt = 0.0;

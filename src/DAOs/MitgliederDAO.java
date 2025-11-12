@@ -120,7 +120,7 @@ public class MitgliederDAO extends BaseDAO<Mitglieder> {
 
 	public List<Mitglieder> findAll() throws SQLException {
 		List<Mitglieder> list = new ArrayList<>();
-		String sql = "SELECT * FROM Mitglieder";
+		String sql = "SELECT m.*, o.* FROM Mitglieder AS m JOIN Ort AS o ON o.OrtID = m.OrtID";
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {

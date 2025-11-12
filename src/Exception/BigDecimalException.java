@@ -1,0 +1,9 @@
+package Exception;
+
+public class BigDecimalException extends Exception {
+    private static final long serialVersionUID = 1L;
+    public BigDecimalException() { super(); }
+    public BigDecimalException(String message) { super(message); }
+    public BigDecimalException(String message, Throwable cause) { super(message, cause); }
+    public BigDecimalException(Throwable cause) { super(cause); }
+}

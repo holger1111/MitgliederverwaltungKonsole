@@ -2,8 +2,8 @@ package Objekte;
 
 import java.util.Objects;
 
-import Validator.IntValidator;
-import Validator.StringValidator;
+import OUTDATED.OUT_IntValidator;
+import OUTDATED.OUT_StringValidator;
 
 public class Zahlung {
     private int zahlungID;
@@ -52,10 +52,10 @@ public class Zahlung {
     }
     
     public void validateAll() throws Exception {
-        IntValidator intVal = new IntValidator();
+        OUT_IntValidator intVal = new OUT_IntValidator();
         intVal.validate(zahlungID);
 
-        StringValidator strVal = new StringValidator();
+        OUT_StringValidator strVal = new OUT_StringValidator();
         strVal.checkLength(zahlungsart, "Zahlungsart", 1, 50);
     }
 }

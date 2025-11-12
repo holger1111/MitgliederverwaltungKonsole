@@ -2,8 +2,8 @@ package Objekte;
 
 import java.util.Objects;
 
-import Validator.IntValidator;
-import Validator.StringValidator;
+import OUTDATED.OUT_IntValidator;
+import OUTDATED.OUT_StringValidator;
 
 public class Vertrag {
     private int vertragID;
@@ -83,11 +83,11 @@ public class Vertrag {
     }
 
     public void validateAll() throws Exception {
-        IntValidator intVal = new IntValidator();
+        OUT_IntValidator intVal = new OUT_IntValidator();
         intVal.validate(vertragID);
         intVal.validate(laufzeit);
 
-        StringValidator strVal = new StringValidator();
+        OUT_StringValidator strVal = new OUT_StringValidator();
         strVal.checkLength(bezeichnung, "Bezeichnung", 1, 100);
     }
 }

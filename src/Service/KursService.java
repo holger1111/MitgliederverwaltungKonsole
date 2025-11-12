@@ -11,10 +11,10 @@ import Exception.ConnectionException;
 import Exception.IntException;
 import Exception.NotFoundException;
 import Manager.KursManager;
+import OUTDATED.OUT_IntValidator;
 import Objekte.Kurs;
 import Objekte.Kurstermin;
 import Objekte.Mitarbeiter;
-import Validator.IntValidator;
 
 public class KursService extends BaseService {
 
@@ -276,7 +276,7 @@ public class KursService extends BaseService {
     private int validateInt(String eingabe, String feldname) throws IntException {
         try {
             int wert = Integer.parseInt(eingabe);
-            IntValidator validator = new IntValidator();
+            OUT_IntValidator validator = new OUT_IntValidator();
             validator.validate(wert);
             return wert;
         } catch (NumberFormatException e) {

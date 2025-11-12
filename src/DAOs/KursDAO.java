@@ -19,7 +19,7 @@ public class KursDAO extends BaseDAO<Kurs> {
 
     @Override
     public Kurs findById(int id) throws SQLException, IntException, NotFoundException {
-        String sql = "SELECT KursID, Bezeichnung, AnzahlTermine, Preis, Kommentar FROM Kurs WHERE KursID = ?";
+        String sql = "SELECT KursID, Bezeichnung, Kostenfrei, Aktiv, Teilnehmerzahl, AnzahlTermine, Preis, Kommentar FROM Kurs WHERE KursID = ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -37,15 +37,18 @@ public class KursDAO extends BaseDAO<Kurs> {
 
     @Override
     public void insert(Kurs entity) throws SQLException {
-        String sql = "INSERT INTO Kurs (Bezeichnung, AnzahlTermine, Preis, Kommentar) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Kurs (Bezeichnung, Kostenfrei, Aktiv, Teilnehmerzahl, AnzahlTermine, Preis, Kommentar) VALUES (?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             ps = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, entity.getBezeichnung());
-            ps.setInt(2, entity.getAnzahlTermine());
-            ps.setDouble(3, entity.getPreis());
-            ps.setString(4, entity.getKommentar());
+            ps.setBoolean(2, entity.isKostenfrei());
+            ps.setBoolean(3, entity.isAktiv());
+            ps.setInt(4, entity.getTeilnehmerzahl());
+            ps.setInt(5, entity.getAnzahlTermine());
+            ps.setDouble(6, entity.getPreis());
+            ps.setString(7, entity.getKommentar());
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -59,15 +62,18 @@ public class KursDAO extends BaseDAO<Kurs> {
 
     @Override
     public void update(Kurs entity) throws SQLException {
-        String sql = "UPDATE Kurs SET Bezeichnung = ?, AnzahlTermine = ?, Preis = ?, Kommentar = ? WHERE KursID = ?";
+        String sql = "UPDATE Kurs SET Bezeichnung = ?, Kostenfrei = ?, Aktiv = ?, Teilnehmerzahl = ?, AnzahlTermine = ?, Preis = ?, Kommentar = ? WHERE KursID = ?";
         PreparedStatement ps = null;
         try {
             ps = connection.prepareStatement(sql);
             ps.setString(1, entity.getBezeichnung());
-            ps.setInt(2, entity.getAnzahlTermine());
-            ps.setDouble(3, entity.getPreis());
-            ps.setString(4, entity.getKommentar());
-            ps.setInt(5, entity.getKursID());
+            ps.setBoolean(2, entity.isKostenfrei());
+            ps.setBoolean(3, entity.isAktiv());
+            ps.setInt(4, entity.getTeilnehmerzahl());
+            ps.setInt(5, entity.getAnzahlTermine());
+            ps.setDouble(6, entity.getPreis());
+            ps.setString(7, entity.getKommentar());
+            ps.setInt(8, entity.getKursID());
             ps.executeUpdate();
         } finally {
             closeResources(null, ps);
@@ -89,7 +95,7 @@ public class KursDAO extends BaseDAO<Kurs> {
 
     public List<Kurs> findAll() throws SQLException {
         List<Kurs> kurse = new ArrayList<>();
-        String sql = "SELECT KursID, Bezeichnung, AnzahlTermine, Preis, Kommentar FROM Kurs";
+        String sql = "SELECT KursID, Bezeichnung, Kostenfrei, Aktiv, Teilnehmerzahl, AnzahlTermine, Preis, Kommentar FROM Kurs";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -106,7 +112,7 @@ public class KursDAO extends BaseDAO<Kurs> {
 
     public List<Kurs> searchAllAttributes(String searchTerm) throws SQLException {
         List<Kurs> results = new ArrayList<>();
-        String sql = "SELECT KursID, Bezeichnung, AnzahlTermine, Preis, Kommentar FROM Kurs " +
+        String sql = "SELECT KursID, Bezeichnung, Kostenfrei, Aktiv, Teilnehmerzahl, AnzahlTermine, Preis, Kommentar FROM Kurs " +
                      "WHERE Bezeichnung LIKE ? OR Kommentar LIKE ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -129,6 +135,9 @@ public class KursDAO extends BaseDAO<Kurs> {
         Kurs kurs = new Kurs();
         kurs.setKursID(rs.getInt("KursID"));
         kurs.setBezeichnung(rs.getString("Bezeichnung"));
+        kurs.setKostenfrei(rs.getBoolean("Kostenfrei"));
+        kurs.setAktiv(rs.getBoolean("Aktiv"));
+        kurs.setTeilnehmerzahl(rs.getInt("Teilnehmerzahl"));
         kurs.setAnzahlTermine(rs.getInt("AnzahlTermine"));
         kurs.setPreis(rs.getDouble("Preis"));
         kurs.setKommentar(rs.getString("Kommentar"));

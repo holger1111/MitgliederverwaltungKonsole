@@ -27,6 +27,11 @@ public class Benutzer {
     public Rolle getRolle() { return rolle; }
     public void setRolle(Rolle rolle) { this.rolle = rolle; }
 
+    // Hilfsmethode, um RolleID zu bekommen (z.B. für DAO und SQL-Operationen)
+    public int getRolleID() {
+        return rolle != null ? rolle.getRolleID() : -1; // oder ggf. Exception werfen
+    }
+
     @Override
     public String toString() {
         return "Benutzer{" +

@@ -8,13 +8,12 @@ import DAOs.ZahlungsdatenDAO;
 import Exception.StringException;
 import Helper.IO;
 import Manager.MitgliederManager;
+import OUTDATED.OUT_StringValidator;
 import Objekte.Mitglieder;
 import Objekte.Ort;
 import Objekte.Zahlungsdaten;
-import Validator.BICValidator;
-import Validator.EMailValidator;
-import Validator.IBANValidator;
-import Validator.StringValidator;
+import Validator.ContactValidator;
+import Validator.PaymentDetailsValidator;
 
 public class MitgliederService extends BaseService {
 
@@ -69,7 +68,22 @@ public class MitgliederService extends BaseService {
 
             String vorname = IO.readString("Vorname: ");
             String nachname = IO.readString("Nachname: ");
-            String telefon = IO.readString("Telefon: ");
+
+            // ContactValidator für Telefon und Mail initialisieren
+            ContactValidator contactValidator = new ContactValidator();
+
+            // Telefon validieren und formatieren
+            String telefon = "";
+            while (true) {
+                telefon = IO.readString("Telefon: ");
+                if (telefon.isEmpty()) break;
+                try {
+                    telefon = contactValidator.validateUndFormatTelefon(telefon);
+                    break;
+                } catch (Exception e) {
+                    System.out.println("Ungültige Telefonnummer: " + e.getMessage());
+                }
+            }
 
             // Geburtsdatum mit Validierungs-Schleife
             java.util.Date geburtstag = null;
@@ -92,7 +106,7 @@ public class MitgliederService extends BaseService {
 
             // PLZ Validator & Schleife
             String plz = "";
-            StringValidator plzValidator = new StringValidator() {
+            OUT_StringValidator plzValidator = new OUT_StringValidator() {
                 @Override
                 public void validate(Object obj) throws StringException {
                     super.validate(obj);
@@ -119,13 +133,12 @@ public class MitgliederService extends BaseService {
 
             // Mail Validator & Schleife
             String mail = "";
-            EMailValidator mailValidator = new EMailValidator();
             while (true) {
                 mail = IO.readString("Mail: ");
                 if (mail.isEmpty())
                     break;
                 try {
-                    mailValidator.validate(mail);
+                    contactValidator.validateEmail(mail);
                     break;
                 } catch (Exception e) {
                     System.out.println("Ungültige Mailadresse: " + e.getMessage());
@@ -141,31 +154,30 @@ public class MitgliederService extends BaseService {
                 ortObj = ortDAO.findById(ortID);
             }
 
-            // Zahlungsdateneingabe mit Validatoren
+            // PaymentDetailsValidator für IBAN und BIC initialisieren
+            PaymentDetailsValidator paymentValidator = new PaymentDetailsValidator();
+
             String zahlungsName = IO.readString("Zahlungsdaten - Name: ");
             String iban = "";
-            String bic = "";
-
-            IBANValidator ibanValidator = new IBANValidator();
             while (true) {
                 iban = IO.readString("IBAN: ");
                 if (iban.isEmpty())
                     break;
                 try {
-                    ibanValidator.validate(iban);
+                    iban = paymentValidator.validateIBAN(iban);
                     break;
                 } catch (Exception e) {
                     System.out.println("Ungültige IBAN: " + e.getMessage());
                 }
             }
 
-            BICValidator bicValidator = new BICValidator();
+            String bic = "";
             while (true) {
                 bic = IO.readString("BIC: ");
                 if (bic.isEmpty())
                     break;
                 try {
-                    bicValidator.validate(bic);
+                    paymentValidator.validateBIC(bic);
                     break;
                 } catch (Exception e) {
                     System.out.println("Ungültiger BIC: " + e.getMessage());
@@ -190,4 +202,5 @@ public class MitgliederService extends BaseService {
             e.printStackTrace();
         }
     }
+
 }

@@ -7,7 +7,7 @@ import Helper.ZeitHelper;
 public class DateTimeValidator extends DateValidator {
 
     @Override
-    public void validate(Object obj) throws Exception {
+    public void validate(Object obj) throws DateException, TimeException {
         errors.clear();
 
         if (!(obj instanceof String)) {
@@ -68,17 +68,3 @@ public class DateTimeValidator extends DateValidator {
         }
     }
 }
-
-//
-//DateTimeValidator validator = new DateTimeValidator();
-//
-//validator.validate("03.11.2025 09:25:30");
-//
-//if (!validator.isValid()) {
-//    for (String error : validator.getErrors()) {
-//        System.out.println(error);
-//    }
-//    validator.saveErrorsToCsv();
-//} else {
-//    System.out.println("Datum und Uhrzeit sind gültig.");
-//}

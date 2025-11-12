@@ -121,15 +121,20 @@ public class BenutzerDAO extends BaseDAO<Benutzer> {
 	}
 
 	private Benutzer mapRowToBenutzer(ResultSet rs) throws SQLException {
-		Benutzer benutzer = new Benutzer();
-		benutzer.setBenutzerID(rs.getInt("BenutzerID"));
-		benutzer.setBenutzername(rs.getString("Benutzername"));
-		benutzer.setPasswort(rs.getString("Passwort"));
+	    Benutzer benutzer = new Benutzer();
+	    benutzer.setBenutzerID(rs.getInt("BenutzerID"));
+	    benutzer.setBenutzername(rs.getString("Benutzername"));
+	    benutzer.setPasswort(rs.getString("Passwort"));
 
-		int rolleID = rs.getInt("RolleID");
-		Rolle rolle = rolleID > 0 ? rolleDAO.findById(rolleID) : null;
-		benutzer.setRolle(rolle);
+	    int rolleID = rs.getInt("RolleID");
+	    Rolle rolle = null;
+	    try {
+	        rolle = rolleID > 0 ? rolleDAO.findById(rolleID) : null;
+	    } catch (SQLException ex) {
+	    }
+	    benutzer.setRolle(rolle);
 
-		return benutzer;
+	    return benutzer;
 	}
+
 }

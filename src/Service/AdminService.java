@@ -1,31 +1,16 @@
 package Service;
 
 import java.sql.Connection;
-import java.util.Scanner;
+import java.util.*;
 
+import Helper.Formater;
 import Manager.KursManager;
 import Manager.MitgliederManager;
 import Manager.MitarbeiterManager;
 import Manager.VerkaufManager;
 import Manager.VertragManager;
-import Objekte.Artikel;
-import Objekte.ArtikelBestellung;
-import Objekte.Benutzer;
-import Objekte.Bestellung;
-import Objekte.Intervall;
-import Objekte.Kategorie;
-import Objekte.Kurs;
-import Objekte.Kursleitung;
-import Objekte.Kursteilnahme;
-import Objekte.Kurstermin;
-import Objekte.Mitarbeiter;
-import Objekte.Mitglieder;
-import Objekte.MitgliederVertrag;
-import Objekte.Ort;
-import Objekte.Rolle;
-import Objekte.Vertrag;
-import Objekte.Zahlung;
-import Objekte.Zahlungsdaten;
+
+import Objekte.*;
 
 public class AdminService extends BaseService {
 
@@ -46,6 +31,21 @@ public class AdminService extends BaseService {
 			this.vertragManager = new VertragManager();
 		} catch (Exception e) {
 			System.out.println("Fehler beim Initialisieren des VertragManagers: " + e.getMessage());
+		}
+		try {
+			this.kursManager = new KursManager();
+		} catch (Exception e) {
+			System.out.println("Fehler beim Initialisieren des KursManagers: " + e.getMessage());
+		}
+		try {
+			this.mitgliederManager = new MitgliederManager();
+		} catch (Exception e) {
+			System.out.println("Fehler beim Initialisieren des MitgliederManagers: " + e.getMessage());
+		}
+		try {
+			this.mitarbeiterManager = new MitarbeiterManager();
+		} catch (Exception e) {
+			System.out.println("Fehler beim Initialisieren des MitarbeiterManagers: " + e.getMessage());
 		}
 	}
 
@@ -113,66 +113,6 @@ public class AdminService extends BaseService {
 				verwalteZahlung();
 				break;
 			case "6":
-				zurueck = true;
-				break;
-			default:
-				System.out.println("Ungültige Eingabe! Bitte erneut versuchen.");
-			}
-		}
-	}
-
-	private void verwalteKategorie() {
-		try {
-			var kategorien = verkaufManager.getKategorieDAO().findAll();
-
-			int maxId = "KategorieID".length();
-			int maxBez = "Bezeichnung".length();
-
-			for (Kategorie k : kategorien) {
-				maxId = Math.max(maxId, String.valueOf(k.getKategorieID()).length());
-				maxBez = Math.max(maxBez, k.getBezeichnung() != null ? k.getBezeichnung().length() : 0);
-			}
-			System.out.println("==== Kategorie ====");
-			String format = "%-" + maxId + "s | %-" + maxBez + "s%n";
-			int trennBreite = maxId + maxBez + 3;
-
-			System.out.printf(format, "KategorieID", "Bezeichnung");
-			System.out.println("-".repeat(trennBreite));
-			for (Kategorie k : kategorien) {
-				System.out.printf(format, k.getKategorieID(), k.getBezeichnung());
-			}
-		} catch (Exception e) {
-			System.out.println("Fehler beim Laden der Kategorien: " + e.getMessage());
-		}
-		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
-	}
-
-	private void kursMenue() {
-		boolean zurueck = false;
-		while (!zurueck) {
-			System.out.println("==== Kurs-Menü ====");
-			System.out.println("1 - Kurs");
-			System.out.println("2 - Kurstermin");
-			System.out.println("3 - Kursteilnahme");
-			System.out.println("4 - Kursleitung");
-			System.out.println("5 - Zurück");
-			System.out.print("Bitte wählen: ");
-			String eingabe = scanner.nextLine();
-
-			switch (eingabe) {
-			case "1":
-				verwalteKurs();
-				break;
-			case "2":
-				verwalteKurstermin();
-				break;
-			case "3":
-				verwalteKursteilnahme();
-				break;
-			case "4":
-				verwalteKursleitung();
-				break;
-			case "5":
 				zurueck = true;
 				break;
 			default:
@@ -275,39 +215,51 @@ public class AdminService extends BaseService {
 		}
 	}
 
+	private void verwalteKategorie() {
+		try {
+			var kategorien = verkaufManager.getKategorieDAO().findAll();
+
+			List<String> headers = Arrays.asList("KategorieID", "Bezeichnung");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>(Arrays.asList("KategorieID".length(), "Bezeichnung".length()));
+
+			for (Kategorie k : kategorien) {
+				List<String> row = Arrays.asList(String.valueOf(k.getKategorieID()),
+						k.getBezeichnung() != null ? k.getBezeichnung() : "-");
+				widths.set(0, Math.max(widths.get(0), row.get(0).length()));
+				widths.set(1, Math.max(widths.get(1), row.get(1).length()));
+				rows.add(row);
+			}
+			System.out.println("==== Kategorie ====");
+			Formater.printTabelle(widths, headers, rows);
+		} catch (Exception e) {
+			System.out.println("Fehler beim Laden der Kategorien: " + e.getMessage());
+		}
+		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
+	}
+
 	private void verwalteArtikel() {
 		try {
 			var artikelList = verkaufManager.getArtikelDAO().findAll();
 
-			int maxId = "ArtikelID".length();
-			int maxName = "Name".length();
-			int maxPreis = "Preis".length();
-			int maxKategorie = "Kategorie".length();
-			int maxKommentar = "Kommentar".length();
+			List<String> headers = Arrays.asList("ArtikelID", "Name", "Preis", "Kategorie", "Kommentar");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 
-			for (Artikel a : artikelList) {
-				maxId = Math.max(maxId, String.valueOf(a.getArtikelID()).length());
-				maxName = Math.max(maxName, a.getName() != null ? a.getName().length() : 0);
-				maxPreis = Math.max(maxPreis, String.format("%.2f", a.getEinzelpreis()).length());
-				String kategorie = (a.getKategorie() != null ? a.getKategorie().getBezeichnung() : "-");
-				maxKategorie = Math.max(maxKategorie, kategorie != null ? kategorie.length() : 0);
-				maxKommentar = Math.max(maxKommentar, a.getKommentar() != null ? a.getKommentar().length() : 0);
-			}
-			System.out.println("==== Artikel ====");
-
-			String format = "%-" + maxId + "s | %-" + maxName + "s | %" + maxPreis + "s | %-" + maxKategorie + "s | %-"
-					+ maxKommentar + "s%n";
-			int trennBreite = maxId + maxName + maxPreis + maxKategorie + maxKommentar + 13;
-
-			System.out.printf(format, "ArtikelID", "Name", "Preis", "Kategorie", "Kommentar");
-			System.out.println("-".repeat(trennBreite));
 			for (Artikel a : artikelList) {
 				String name = a.getName() != null ? a.getName() : "-";
 				String preis = String.format("%.2f", a.getEinzelpreis());
 				String kategorie = (a.getKategorie() != null ? a.getKategorie().getBezeichnung() : "-");
 				String kommentar = a.getKommentar() != null ? a.getKommentar() : "-";
-				System.out.printf(format, a.getArtikelID(), name, preis, kategorie, kommentar);
+				List<String> row = Arrays.asList(String.valueOf(a.getArtikelID()), name, preis, kategorie, kommentar);
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
+			System.out.println("==== Artikel ====");
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Artikel: " + e.getMessage());
 		}
@@ -317,29 +269,22 @@ public class AdminService extends BaseService {
 	private void verwalteArtikelBestellung() {
 		try {
 			var list = verkaufManager.getArtikelBestellungDAO().findAll();
-
-			int maxBest = "BestellungID".length();
-			int maxArt = "ArtikelID".length();
-			int maxMenge = "Menge".length();
-			int maxAufaddiert = "Aufaddiert".length();
+			List<String> headers = Arrays.asList("BestellungID", "ArtikelID", "Menge", "Aufaddiert");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 
 			for (ArtikelBestellung ab : list) {
-				maxBest = Math.max(maxBest, String.valueOf(ab.getBestellungID()).length());
-				maxArt = Math.max(maxArt, String.valueOf(ab.getArtikelID()).length());
-				maxMenge = Math.max(maxMenge, String.valueOf(ab.getMenge()).length());
-				maxAufaddiert = Math.max(maxAufaddiert, String.format("%.2f", ab.getAufaddiert()).length());
+				List<String> row = Arrays.asList(String.valueOf(ab.getBestellungID()),
+						String.valueOf(ab.getArtikelID()), String.valueOf(ab.getMenge()),
+						String.format("%.2f", ab.getAufaddiert()));
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
 			System.out.println("==== ArtikelBestellung ====");
-
-			String format = "%-" + maxBest + "s | %-" + maxArt + "s | %-" + maxMenge + "s | %" + maxAufaddiert + "s%n";
-			int trennBreite = maxBest + maxArt + maxMenge + maxAufaddiert + 11;
-
-			System.out.printf(format, "BestellungID", "ArtikelID", "Menge", "Aufaddiert");
-			System.out.println("-".repeat(trennBreite));
-			for (ArtikelBestellung ab : list) {
-				System.out.printf(format, ab.getBestellungID(), ab.getArtikelID(), ab.getMenge(),
-						String.format("%.2f", ab.getAufaddiert()));
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der ArtikelBestellungen: " + e.getMessage());
 		}
@@ -349,27 +294,25 @@ public class AdminService extends BaseService {
 	private void verwalteBestellung() {
 		try {
 			var bestellungen = verkaufManager.getBestellungDAO().findAll();
-
-			int maxId = "BestellungID".length();
-			int maxMitglied = "MitgliedID".length();
-			int maxPreis = "Gesamtpreis".length();
+			List<String> headers = Arrays.asList("BestellungID", "MitgliedID", "Bestelldatum", "ZahlungID",
+					"MitarbeiterID", "Gesamtpreis");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 
 			for (Bestellung b : bestellungen) {
-				maxId = Math.max(maxId, String.valueOf(b.getBestellungID()).length());
-				maxMitglied = Math.max(maxMitglied, String.valueOf(b.getMitgliederID()).length());
-				maxPreis = Math.max(maxPreis, String.format("%.2f", b.getGesamtpreis()).length());
+				List<String> row = Arrays.asList(Formater.printID(b.getBestellungID(), 5),
+						String.valueOf(b.getMitgliederID()), Formater.printDatum(b.getBestelldatum()), // neues Feld
+						String.valueOf(b.getZahlungID()), // neues Feld
+						String.valueOf(b.getMitarbeiterID()), // neues Feld
+						Formater.printWährung(b.getGesamtpreis(), 12));
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
 			System.out.println("==== Bestellung ====");
-
-			String format = "%-" + maxId + "s | %-" + maxMitglied + "s | %" + maxPreis + "s%n";
-			int trennBreite = maxId + maxMitglied + maxPreis + 7;
-
-			System.out.printf(format, "BestellungID", "MitgliedID", "Gesamtpreis");
-			System.out.println("-".repeat(trennBreite));
-			for (Bestellung b : bestellungen) {
-				System.out.printf(format, b.getBestellungID(), b.getMitgliederID(),
-						String.format("%.2f", b.getGesamtpreis()));
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Bestellungen: " + e.getMessage());
 		}
@@ -379,26 +322,184 @@ public class AdminService extends BaseService {
 	private void verwalteZahlung() {
 		try {
 			var zahlungen = verkaufManager.getZahlungDAO().findAll();
-
-			int maxId = "ZahlungID".length();
-			int maxArt = "Zahlungsart".length();
+			List<String> headers = Arrays.asList("ZahlungID", "Zahlungsart");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 
 			for (Zahlung z : zahlungen) {
-				maxId = Math.max(maxId, String.valueOf(z.getZahlungID()).length());
-				maxArt = Math.max(maxArt, z.getZahlungsart() != null ? z.getZahlungsart().length() : 0);
+				List<String> row = Arrays.asList(String.valueOf(z.getZahlungID()),
+						z.getZahlungsart() != null ? z.getZahlungsart() : "-");
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
 			System.out.println("==== Zahlung ====");
-
-			String format = "%-" + maxId + "s | %-" + maxArt + "s%n";
-			int trennBreite = maxId + maxArt + 3;
-
-			System.out.printf(format, "ZahlungID", "Zahlungsart");
-			System.out.println("-".repeat(trennBreite));
-			for (Zahlung z : zahlungen) {
-				System.out.printf(format, z.getZahlungID(), z.getZahlungsart());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Zahlungen: " + e.getMessage());
+		}
+		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
+	}
+
+	private void kursMenue() {
+		boolean zurueck = false;
+		while (!zurueck) {
+			System.out.println("==== Kurs-Menü ====");
+			System.out.println("1 - Kurs");
+			System.out.println("2 - Kurstermin");
+			System.out.println("3 - Kursteilnahme");
+			System.out.println("4 - Kursleitung");
+			System.out.println("5 - Zurück");
+			System.out.print("Bitte wählen: ");
+			String eingabe = scanner.nextLine();
+
+			switch (eingabe) {
+			case "1":
+				verwalteKurs();
+				break;
+			case "2":
+				verwalteKurstermin();
+				break;
+			case "3":
+				verwalteKursteilnahme();
+				break;
+			case "4":
+				verwalteKursleitung();
+				break;
+			case "5":
+				zurueck = true;
+				break;
+			default:
+				System.out.println("Ungültige Eingabe! Bitte erneut versuchen.");
+			}
+		}
+	}
+
+	private void verwalteKurs() {
+		try {
+			var kurse = kursManager.getKursDAO().findAll();
+			List<String> headers = Arrays.asList("KursID", "Bezeichnung", "Kostenfrei", "Aktiv", "Teilnehmerzahl",
+					"Preis", "AnzahlTermine", "Kommentar");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
+			for (Kurs k : kurse) {
+			    List<String> row = Arrays.asList(
+			        Formater.printID(k.getKursID(), 5),
+			        k.getBezeichnung() != null ? k.getBezeichnung() : "-",
+			        k.isKostenfrei() ? "Ja" : "Nein",
+			        k.isAktiv() ? "Ja" : "Nein",
+			        String.valueOf(k.getTeilnehmerzahl()),
+			        Formater.printWährung(k.getPreis(), 12),
+			        String.valueOf(k.getAnzahlTermine()),
+			        k.getKommentar() != null ? k.getKommentar() : "-"
+			    );
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
+			}
+			System.out.println("==== Kurse ====");
+			Formater.printTabelle(widths, headers, rows);
+		} catch (Exception e) {
+			System.out.println("Fehler beim Laden der Kurse: " + e.getMessage());
+		}
+		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
+	}
+
+	private void verwalteKurstermin() {
+		try {
+			var termine = kursManager.getKursterminDAO().findAll();
+			List<String> headers = Arrays.asList("KursterminID", "KursID", "Termin", "Teilnehmerfrei",
+				    "Anmeldebar", "Aktiv", "Kommentar");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
+			for (Kurstermin kt : termine) {
+			    List<String> row = Arrays.asList(
+			        Formater.printID(kt.getKursterminID(), 5),
+			        Formater.printID(kt.getKursID(), 5),
+			        kt.getTermin() != null ? Formater.printDatum(kt.getTermin()) : "-",
+			        kt.getTeilnehmerfrei()> 0 ? "Ja" : "Nein",
+			        kt.isAnmeldebar() ? "Ja" : "Nein",
+			        kt.isAktiv() ? "Ja" : "Nein",
+			        kt.getKommentar() != null ? kt.getKommentar() : "-"
+			    );
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
+			}
+			System.out.println("==== Kurstermine ====");
+			Formater.printTabelle(widths, headers, rows);
+		} catch (Exception e) {
+			System.out.println("Fehler beim Laden der Kurstermine: " + e.getMessage());
+		}
+		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
+	}
+
+	private void verwalteKursteilnahme() {
+		try {
+			var teilnahmen = kursManager.getKursteilnahmeDAO().findAll();
+			List<String> headers = Arrays.asList("MitgliederID", "KursterminID", "Angemeldet", "Anmeldezeit",
+				    "Abgemeldet", "Abmeldezeit", "Aktiv", "Kommentar");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
+			for (Kursteilnahme kt : teilnahmen) {
+			    List<String> row = Arrays.asList(
+			        Formater.printID(kt.getMitgliederID(), 5),
+			        Formater.printID(kt.getKursterminID(), 5),
+			        kt.isAngemeldet() ? "Ja" : "Nein",
+			        kt.getAnmeldezeit() != null ? Formater.printDatum(kt.getAnmeldezeit()) : "-",
+			        kt.isAbgemeldet() ? "Ja" : "Nein",
+			        kt.getAbmeldezeit() != null ? Formater.printDatum(kt.getAbmeldezeit()) : "-",
+			        kt.isAktiv() ? "Ja" : "Nein",
+			        kt.getKommentar() != null ? kt.getKommentar() : "-"
+			    );
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
+			}
+			System.out.println("==== Kursteilnahmen ====");
+			Formater.printTabelle(widths, headers, rows);
+		} catch (Exception e) {
+			System.out.println("Fehler beim Laden der Kursteilnahmen: " + e.getMessage());
+		}
+		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
+	}
+
+	private void verwalteKursleitung() {
+		try {
+			var leitungen = kursManager.getKursleitungDAO().findAll();
+			List<String> headers = Arrays.asList("KursterminID", "MitarbeiterID", "Bestaetigt", "Bestaetigungszeit",
+				    "Abgemeldet", "Abmeldezeit", "Aktiv", "Kommentar");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
+			for (Kursleitung kl : leitungen) {
+			    List<String> row = Arrays.asList(
+			        Formater.printID(kl.getKursterminID(), 5),
+			        Formater.printID(kl.getMitarbeiterID(), 5),
+			        kl.isBestätigt() ? "Ja" : "Nein",
+			        kl.getBestätigungszeit() != null ? Formater.printDatum(kl.getBestätigungszeit()) : "-",
+			        kl.isAbgemeldet() ? "Ja" : "Nein",
+			        kl.getAbmeldezeit() != null ? Formater.printDatum(kl.getAbmeldezeit()) : "-",
+			        kl.isAktiv() ? "Ja" : "Nein",
+			        kl.getKommentar() != null ? kl.getKommentar() : "-"
+			    );
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
+			}
+			System.out.println("==== Kursleitungen ====");
+			Formater.printTabelle(widths, headers, rows);
+		} catch (Exception e) {
+			System.out.println("Fehler beim Laden der Kursleitungen: " + e.getMessage());
 		}
 		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
 	}
@@ -434,30 +535,29 @@ public class AdminService extends BaseService {
 			default:
 				System.out.println("Ungültige Eingabe! Bitte erneut versuchen.");
 			}
-
 		}
 	}
 
 	private void verwalteVertrag() {
 		try {
 			var vertragListe = vertragManager.getVertragDAO().findAll();
-
-			int maxId = "VertragID".length();
-			int maxBezeichnung = "Bezeichnung".length();
-
+			List<String> headers = Arrays.asList("VertragID", "Bezeichnung", "Laufzeit", "Grundpreis");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 			for (Vertrag v : vertragListe) {
-				maxId = Math.max(maxId, String.valueOf(v.getVertragID()).length());
-				maxBezeichnung = Math.max(maxBezeichnung, v.getBezeichnung() != null ? v.getBezeichnung().length() : 0);
+				List<String> row = Arrays.asList(Formater.printID(v.getVertragID(), 5),
+						v.getBezeichnung() != null ? v.getBezeichnung() : "-",
+						v.getLaufzeit() != 0 ? Integer.toString(v.getLaufzeit()) : "-", // neues Feld
+						Formater.printWährung(v.getGrundpreis(), 10) // neues Feld
+				);
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
 			System.out.println("==== Vertrag ====");
-			String format = "%-" + maxId + "s | %-" + maxBezeichnung + "s%n";
-			int trennBreite = maxId + maxBezeichnung + 3;
-
-			System.out.printf(format, "VertragID", "Name");
-			System.out.println("-".repeat(trennBreite));
-			for (Vertrag v : vertragListe) {
-				System.out.printf(format, v.getVertragID(), v.getBezeichnung());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Verträge: " + e.getMessage());
 		}
@@ -467,24 +567,22 @@ public class AdminService extends BaseService {
 	private void verwalteIntervall() {
 		try {
 			var intervallListe = vertragManager.getIntervallDAO().findAll();
-
-			int maxId = "IntervallID".length();
-			int maxBeschreibung = "Beschreibung".length();
-
+			List<String> headers = Arrays.asList("IntervallID", "Beschreibung", "Zahlungsintervall");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 			for (Intervall i : intervallListe) {
-				maxId = Math.max(maxId, String.valueOf(i.getIntervallID()).length());
-				maxBeschreibung = Math.max(maxBeschreibung,
-						i.getBezeichnung() != null ? i.getBezeichnung().length() : 0);
+				List<String> row = Arrays.asList(Formater.printID(i.getIntervallID(), 5),
+						i.getBezeichnung() != null ? i.getBezeichnung() : "-",
+						i.getZahlungsintervall() != null ? i.getZahlungsintervall().toString() : "-" // neues Feld
+				);
+				for (int j = 0; j < headers.size(); j++)
+					widths.set(j, Math.max(widths.get(j), row.get(j).length()));
+				rows.add(row);
 			}
 			System.out.println("==== Intervall ====");
-			String format = "%-" + maxId + "s | %-" + maxBeschreibung + "s%n";
-			int trennBreite = maxId + maxBeschreibung + 3;
-
-			System.out.printf(format, "IntervallID", "Beschreibung");
-			System.out.println("-".repeat(trennBreite));
-			for (Intervall i : intervallListe) {
-				System.out.printf(format, i.getIntervallID(), i.getBezeichnung());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Intervalle: " + e.getMessage());
 		}
@@ -494,274 +592,31 @@ public class AdminService extends BaseService {
 	private void verwalteMitgliederVertrag() {
 		try {
 			var mitgliederVertragListe = vertragManager.getMitgliederVertragDAO().findAll();
-
-			int maxMitgliederId = "MitgliedID".length();
-			int maxVertragId = "VertragID".length();
-
+			List<String> headers = Arrays.asList("MitgliedID", "VertragID", "VertragNr", "Vertragsbeginn",
+					"Vertragsende", "Verlaengerung", "Aktiv", "Gekuendigt", "Preisrabatt", "IntervallID", "ZahlungID",
+					"Trainingsbeginn", "MitarbeiterID", "Kommentar");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 			for (MitgliederVertrag mv : mitgliederVertragListe) {
-				maxMitgliederId = Math.max(maxMitgliederId, String.valueOf(mv.getMitgliederID()).length());
-				maxVertragId = Math.max(maxVertragId, String.valueOf(mv.getVertragID()).length());
+				List<String> row = Arrays.asList(Formater.printID(mv.getMitgliederID(), 5),
+						Formater.printID(mv.getVertragID(), 5),
+						mv.getVertragNr() != 0 ? Integer.toString(mv.getVertragNr()) : "-",
+						Formater.printDatum(mv.getVertragsbeginn()), Formater.printDatum(mv.getVertragsende()),
+						mv.isVerlängerung() ? "Ja" : "Nein", mv.isAktiv() ? "Ja" : "Nein",
+						mv.isGekündigt() ? "Ja" : "Nein", String.format("%.2f", mv.getPreisrabatt()),
+						Formater.printID(mv.getIntervallID(), 5), Formater.printID(mv.getZahlungID(), 5),
+						Formater.printDatum(mv.getTrainingsbeginn()), Formater.printID(mv.getMitarbeiterID(), 5),
+						mv.getKommentar() != null ? mv.getKommentar() : "-");
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
 			System.out.println("==== MitgliederVertrag ====");
-			String format = "%-" + maxMitgliederId + "s | %-" + maxVertragId + "s%n";
-			int trennBreite = maxMitgliederId + maxVertragId + 3;
-
-			System.out.printf(format, "MitgliedID", "VertragID");
-			System.out.println("-".repeat(trennBreite));
-			for (MitgliederVertrag mv : mitgliederVertragListe) {
-				System.out.printf(format, mv.getMitgliederID(), mv.getVertragID());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der MitgliederVerträge: " + e.getMessage());
-		}
-		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
-	}
-
-	private void verwalteKurs() {
-		try {
-			var kurse = kursManager.getKursDAO().findAll();
-			int maxId = "KursID".length();
-			int maxBez = "Bezeichnung".length();
-
-			for (Kurs k : kurse) {
-				maxId = Math.max(maxId, String.valueOf(k.getKursID()).length());
-				maxBez = Math.max(maxBez, k.getBezeichnung() != null ? k.getBezeichnung().length() : 0);
-			}
-
-			String format = "%-" + maxId + "s | %-" + maxBez + "s%n";
-			System.out.println("==== Kurse ====");
-			System.out.printf(format, "KursID", "Bezeichnung");
-			System.out.println("-".repeat(maxId + maxBez + 3));
-			for (Kurs k : kurse) {
-				System.out.printf(format, k.getKursID(), k.getBezeichnung());
-			}
-		} catch (Exception e) {
-			System.out.println("Fehler beim Laden der Kurse: " + e.getMessage());
-		}
-		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
-	}
-
-	private void verwalteKurstermin() {
-		try {
-			var termine = kursManager.getKursterminDAO().findAll();
-			int maxId = "KursterminID".length();
-			int maxDatum = "Termin".length();
-
-			for (Kurstermin kt : termine) {
-				maxId = Math.max(maxId, String.valueOf(kt.getKursterminID()).length());
-				maxDatum = Math.max(maxDatum, kt.getTermin().toString().length());
-			}
-
-			String format = "%-" + maxId + "s | %-" + maxDatum + "s%n";
-			System.out.println("==== Kurstermine ====");
-			System.out.printf(format, "KursterminID", "Termin");
-			System.out.println("-".repeat(maxId + maxDatum + 3));
-			for (Kurstermin kt : termine) {
-				System.out.printf(format, kt.getKursterminID(), kt.getTermin());
-			}
-		} catch (Exception e) {
-			System.out.println("Fehler beim Laden der Kurstermine: " + e.getMessage());
-		}
-		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
-	}
-
-	private void verwalteKursteilnahme() {
-		try {
-			var teilnahmen = kursManager.getKursteilnahmeDAO().findAll();
-			int maxMitgliederId = "MitgliederID".length();
-			int maxTerminId = "KursterminID".length();
-
-			for (Kursteilnahme kt : teilnahmen) {
-				maxMitgliederId = Math.max(maxMitgliederId, String.valueOf(kt.getMitgliederID()).length());
-				maxTerminId = Math.max(maxTerminId, String.valueOf(kt.getKursterminID()).length());
-			}
-
-			String format = "%-" + maxMitgliederId + "s | %-" + maxTerminId + "s%n";
-			System.out.println("==== Kursteilnahmen ====");
-			System.out.printf(format, "MitgliederID", "KursterminID");
-			System.out.println("-".repeat(maxMitgliederId + maxTerminId + 3));
-			for (Kursteilnahme kt : teilnahmen) {
-				System.out.printf(format, kt.getMitgliederID(), kt.getKursterminID());
-			}
-		} catch (Exception e) {
-			System.out.println("Fehler beim Laden der Kursteilnahmen: " + e.getMessage());
-		}
-		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
-	}
-
-	private void verwalteKursleitung() {
-		try {
-			var leitungen = kursManager.getKursleitungDAO().findAll();
-			int maxTerminId = "KursterminID".length();
-			int maxMitarbeiterId = "MitarbeiterID".length();
-
-			for (Kursleitung kl : leitungen) {
-				maxTerminId = Math.max(maxTerminId, String.valueOf(kl.getKursterminID()).length());
-				maxMitarbeiterId = Math.max(maxMitarbeiterId, String.valueOf(kl.getMitarbeiterID()).length());
-			}
-
-			String format = "%-" + maxTerminId + "s | %-" + maxMitarbeiterId + "s%n";
-			System.out.println("==== Kursleitungen ====");
-			System.out.printf(format, "KursterminID", "MitarbeiterID");
-			System.out.println("-".repeat(maxTerminId + maxMitarbeiterId + 3));
-			for (Kursleitung kl : leitungen) {
-				System.out.printf(format, kl.getKursterminID(), kl.getMitarbeiterID());
-			}
-		} catch (Exception e) {
-			System.out.println("Fehler beim Laden der Kursleitungen: " + e.getMessage());
-		}
-		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
-	}
-
-	private void verwalteMitglieder() {
-		try {
-			var mitglieder = mitgliederManager.getMitgliederDAO().findAll();
-
-			int maxId = "MitgliedID".length();
-			int maxVorname = "Vorname".length();
-			int maxNachname = "Nachname".length();
-			int maxGeburtsdatum = "Geburtsdatum".length();
-			int maxAktiv = "Aktiv".length();
-			int maxStrasse = "Strasse".length();
-			int maxHausnr = "Hausnr".length();
-			int maxOrtID = "OrtID".length();
-			int maxZahlungsdatenID = "ZahlungsdatenID".length();
-			int maxTelefon = "Telefon".length();
-			int maxMail = "Mail".length();
-
-			for (Mitglieder m : mitglieder) {
-				maxId = Math.max(maxId, String.valueOf(m.getMitgliederID()).length());
-				maxVorname = Math.max(maxVorname, m.getVorname() != null ? m.getVorname().length() : 0);
-				maxNachname = Math.max(maxNachname, m.getNachname() != null ? m.getNachname().length() : 0);
-				maxGeburtsdatum = Math.max(maxGeburtsdatum,
-						m.getGeburtsdatum() != null ? m.getGeburtsdatum().toString().length() : 0);
-				maxAktiv = Math.max(maxAktiv, String.valueOf(m.isAktiv()).length());
-				maxStrasse = Math.max(maxStrasse, m.getStrasse() != null ? m.getStrasse().length() : 0);
-				maxHausnr = Math.max(maxHausnr, m.getHausnr() != null ? m.getHausnr().length() : 0);
-				maxOrtID = Math.max(maxOrtID, String.valueOf(m.getOrtID()).length());
-				maxZahlungsdatenID = Math.max(maxZahlungsdatenID, String.valueOf(m.getZahlungsdatenID()).length());
-				maxTelefon = Math.max(maxTelefon, m.getTelefon() != null ? m.getTelefon().length() : 0);
-				maxMail = Math.max(maxMail, m.getMail() != null ? m.getMail().length() : 0);
-			}
-
-			String format = "%-" + maxId + "s | %-" + maxVorname + "s | %-" + maxNachname + "s | %-" + maxGeburtsdatum
-					+ "s | %-" + maxAktiv + "s | %-" + maxStrasse + "s | %-" + maxHausnr + "s | %-" + maxOrtID
-					+ "s | %-" + maxZahlungsdatenID + "s | %-" + maxTelefon + "s | %-" + maxMail + "s%n";
-
-			int trennBreite = maxId + maxVorname + maxNachname + maxGeburtsdatum + maxAktiv + maxStrasse + maxHausnr
-					+ maxOrtID + maxZahlungsdatenID + maxTelefon + maxMail + 11 * 3; // für Trennzeichen
-
-			System.out.println("==== Mitglieder ====");
-			System.out.printf(format, "MitgliedID", "Vorname", "Nachname", "Geburtsdatum", "Aktiv", "Strasse", "Hausnr",
-					"OrtID", "ZahlungsdatenID", "Telefon", "Mail");
-			System.out.println("-".repeat(trennBreite));
-			for (Mitglieder m : mitglieder) {
-				System.out.printf(format, m.getMitgliederID(), m.getVorname(), m.getNachname(), m.getGeburtsdatum(),
-						m.isAktiv(), m.getStrasse(), m.getHausnr(), m.getOrtID(), m.getZahlungsdatenID(),
-						m.getTelefon(), m.getMail());
-			}
-		} catch (Exception e) {
-			System.out.println("Fehler beim Laden der Mitglieder: " + e.getMessage());
-		}
-		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
-	}
-
-	private void verwalteMitarbeiter() {
-		try {
-			var mitarbeiter = mitarbeiterManager.getMitarbeiterDAO().findAll();
-
-			int maxId = "MitarbeiterID".length();
-			int maxVorname = "Vorname".length();
-			int maxNachname = "Nachname".length();
-			int maxGeburtsdatum = "Geburtsdatum".length();
-			int maxAktiv = "Aktiv".length();
-			int maxStrasse = "Strasse".length();
-			int maxHausnr = "Hausnr".length();
-			int maxTelefon = "Telefon".length();
-			int maxMail = "Mail".length();
-			int maxOrtID = "OrtID".length();
-			int maxOrtName = "Ort".length();
-			int maxZahlungsdatenID = "ZahlungsdatenID".length();
-			int maxZName = "Z-Name".length();
-			int maxZIBAN = "IBAN".length();
-			int maxZBIC = "BIC".length();
-			int maxBenutzerID = "BenutzerID".length();
-			int maxBenutzername = "Benutzername".length();
-			int maxRolleID = "RolleID".length();
-			int maxRolleBez = "Rolle".length();
-
-			for (Mitarbeiter ma : mitarbeiter) {
-				maxId = Math.max(maxId, String.valueOf(ma.getMitarbeiterID()).length());
-				maxVorname = Math.max(maxVorname, ma.getVorname() != null ? ma.getVorname().length() : 0);
-				maxNachname = Math.max(maxNachname, ma.getNachname() != null ? ma.getNachname().length() : 0);
-				maxGeburtsdatum = Math.max(maxGeburtsdatum,
-						ma.getGeburtsdatum() != null ? ma.getGeburtsdatum().toString().length() : 0);
-				maxAktiv = Math.max(maxAktiv, String.valueOf(ma.isAktiv()).length());
-				maxStrasse = Math.max(maxStrasse, ma.getStraße() != null ? ma.getStraße().length() : 0);
-				maxHausnr = Math.max(maxHausnr, ma.getHausnr() != null ? ma.getHausnr().length() : 0);
-				maxTelefon = Math.max(maxTelefon, ma.getTelefon() != null ? ma.getTelefon().length() : 0);
-				maxMail = Math.max(maxMail, ma.getMail() != null ? ma.getMail().length() : 0);
-				if (ma.getOrt() != null) {
-					maxOrtID = Math.max(maxOrtID, String.valueOf(ma.getOrt().getOrtID()).length());
-					maxOrtName = Math.max(maxOrtName, ma.getOrt().getOrt() != null ? ma.getOrt().getOrt().length() : 0);
-				}
-				if (ma.getZahlungsdaten() != null) {
-					maxZahlungsdatenID = Math.max(maxZahlungsdatenID,
-							String.valueOf(ma.getZahlungsdaten().getZahlungsdatenID()).length());
-					maxZName = Math.max(maxZName,
-							ma.getZahlungsdaten().getName() != null ? ma.getZahlungsdaten().getName().length() : 0);
-					maxZIBAN = Math.max(maxZIBAN,
-							ma.getZahlungsdaten().getIBAN() != null ? ma.getZahlungsdaten().getIBAN().length() : 0);
-					maxZBIC = Math.max(maxZBIC,
-							ma.getZahlungsdaten().getBIC() != null ? ma.getZahlungsdaten().getBIC().length() : 0);
-				}
-				if (ma.getBenutzer() != null) {
-					maxBenutzerID = Math.max(maxBenutzerID, String.valueOf(ma.getBenutzer().getBenutzerID()).length());
-					maxBenutzername = Math.max(maxBenutzername,
-							ma.getBenutzer().getBenutzername() != null ? ma.getBenutzer().getBenutzername().length()
-									: 0);
-					if (ma.getBenutzer().getRolle() != null) {
-						maxRolleID = Math.max(maxRolleID,
-								String.valueOf(ma.getBenutzer().getRolle().getRolleID()).length());
-						maxRolleBez = Math.max(maxRolleBez,
-								ma.getBenutzer().getRolle().getBezeichnung() != null
-										? ma.getBenutzer().getRolle().getBezeichnung().length()
-										: 0);
-					}
-				}
-			}
-
-			String format = "%-" + maxId + "s | %-" + maxVorname + "s | %-" + maxNachname + "s | %-" + maxGeburtsdatum
-					+ "s | %-" + maxAktiv + "s | %-" + maxStrasse + "s | %-" + maxHausnr + "s | %-" + maxTelefon
-					+ "s | %-" + maxMail + "s | %-" + maxOrtID + "s | %-" + maxOrtName + "s | %-" + maxZahlungsdatenID
-					+ "s | %-" + maxZName + "s | %-" + maxZIBAN + "s | %-" + maxZBIC + "s | %-" + maxBenutzerID
-					+ "s | %-" + maxBenutzername + "s | %-" + maxRolleID + "s | %-" + maxRolleBez + "s%n";
-
-			int trennBreite = maxId + maxVorname + maxNachname + maxGeburtsdatum + maxAktiv + maxStrasse + maxHausnr
-					+ maxTelefon + maxMail + maxOrtID + maxOrtName + maxZahlungsdatenID + maxZName + maxZIBAN + maxZBIC
-					+ maxBenutzerID + maxBenutzername + maxRolleID + maxRolleBez + 19 * 3;
-
-			System.out.println("==== Mitarbeiter ====");
-			System.out.printf(format, "MitarbeiterID", "Vorname", "Nachname", "Geburtsdatum", "Aktiv", "Strasse",
-					"Hausnr", "Telefon", "Mail", "OrtID", "Ort", "ZahlungsdatenID", "Z-Name", "IBAN", "BIC",
-					"BenutzerID", "Benutzername", "RolleID", "Rolle");
-			System.out.println("-".repeat(trennBreite));
-			for (Mitarbeiter ma : mitarbeiter) {
-				Ort ort = ma.getOrt();
-				Zahlungsdaten zd = ma.getZahlungsdaten();
-				Benutzer benutzer = ma.getBenutzer();
-				Rolle rolle = benutzer != null ? benutzer.getRolle() : null;
-				System.out.printf(format, ma.getMitarbeiterID(), ma.getVorname(), ma.getNachname(),
-						ma.getGeburtsdatum(), ma.isAktiv(), ma.getStraße(), ma.getHausnr(), ma.getTelefon(),
-						ma.getMail(), ort != null ? ort.getOrtID() : "-", ort != null ? ort.getOrt() : "-",
-						zd != null ? zd.getZahlungsdatenID() : "-", zd != null ? zd.getName() : "-",
-						zd != null ? zd.getIBAN() : "-", zd != null ? zd.getBIC() : "-",
-						benutzer != null ? benutzer.getBenutzerID() : "-",
-						benutzer != null ? benutzer.getBenutzername() : "-", rolle != null ? rolle.getRolleID() : "-",
-						rolle != null ? rolle.getBezeichnung() : "-");
-			}
-		} catch (Exception e) {
-			System.out.println("Fehler beim Laden der Mitarbeiter: " + e.getMessage());
 		}
 		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
 	}
@@ -769,23 +624,20 @@ public class AdminService extends BaseService {
 	private void verwalteOrt() {
 		try {
 			var orte = mitarbeiterManager.getOrtDAO().findAll();
-			int maxId = "OrtID".length();
-			int maxPLZ = "PLZ".length();
-			int maxOrt = "Ort".length();
-
+			List<String> headers = Arrays.asList("OrtID", "PLZ", "Ort");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 			for (Ort o : orte) {
-				maxId = Math.max(maxId, String.valueOf(o.getOrtID()).length());
-				maxPLZ = Math.max(maxPLZ, o.getPLZ() != null ? o.getPLZ().length() : 0);
-				maxOrt = Math.max(maxOrt, o.getOrt() != null ? o.getOrt().length() : 0);
+				List<String> row = Arrays.asList(String.valueOf(o.getOrtID()), o.getPLZ() != null ? o.getPLZ() : "-",
+						o.getOrt() != null ? o.getOrt() : "-");
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
-
-			String format = "%-" + maxId + "s | %-" + maxPLZ + "s | %-" + maxOrt + "s%n";
 			System.out.println("==== Orte ====");
-			System.out.printf(format, "OrtID", "PLZ", "Ort");
-			System.out.println("-".repeat(maxId + maxPLZ + maxOrt + 6));
-			for (Ort o : orte) {
-				System.out.printf(format, o.getOrtID(), o.getPLZ(), o.getOrt());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Orte: " + e.getMessage());
 		}
@@ -795,21 +647,21 @@ public class AdminService extends BaseService {
 	private void verwalteZahlungsdaten() {
 		try {
 			var zahlungen = mitarbeiterManager.getZahlungsdatenDAO().findAll();
-			int maxId = "ZahlungsdatenID".length();
-			int maxName = "Name".length();
-
+			List<String> headers = Arrays.asList("ZahlungsdatenID", "Name", "IBAN", "BIC");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 			for (Zahlungsdaten z : zahlungen) {
-				maxId = Math.max(maxId, String.valueOf(z.getZahlungsdatenID()).length());
-				maxName = Math.max(maxName, z.getName() != null ? z.getName().length() : 0);
+				List<String> row = Arrays.asList(String.valueOf(z.getZahlungsdatenID()),
+						z.getName() != null ? z.getName() : "-", z.getIBAN() != null ? z.getIBAN() : "-",
+						z.getBIC() != null ? z.getBIC() : "-");
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
-
-			String format = "%-" + maxId + "s | %-" + maxName + "s%n";
 			System.out.println("==== Zahlungsdaten ====");
-			System.out.printf(format, "ZahlungsdatenID", "Name");
-			System.out.println("-".repeat(maxId + maxName + 3));
-			for (Zahlungsdaten z : zahlungen) {
-				System.out.printf(format, z.getZahlungsdatenID(), z.getName());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Zahlungsdaten: " + e.getMessage());
 		}
@@ -819,23 +671,88 @@ public class AdminService extends BaseService {
 	private void verwalteBenutzer() {
 		try {
 			var benutzer = mitarbeiterManager.getBenutzerDAO().findAll();
-			int maxId = "BenutzerID".length();
-			int maxName = "Benutzername".length();
-
+			List<String> headers = Arrays.asList("BenutzerID", "Benutzername", "Passwort", "RolleID");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 			for (Benutzer b : benutzer) {
-				maxId = Math.max(maxId, String.valueOf(b.getBenutzerID()).length());
-				maxName = Math.max(maxName, b.getBenutzername() != null ? b.getBenutzername().length() : 0);
+			    List<String> row = Arrays.asList(
+			        Formater.printID(b.getBenutzerID(), 5),
+			        b.getBenutzername() != null ? b.getBenutzername() : "-",
+			        "******",                                     // maskiertes Passwort
+			        Formater.printID(b.getRolleID(), 5)
+			    );
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
-
-			String format = "%-" + maxId + "s | %-" + maxName + "s%n";
 			System.out.println("==== Benutzer ====");
-			System.out.printf(format, "BenutzerID", "Benutzername");
-			System.out.println("-".repeat(maxId + maxName + 3));
-			for (Benutzer b : benutzer) {
-				System.out.printf(format, b.getBenutzerID(), b.getBenutzername());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Benutzer: " + e.getMessage());
+		}
+		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
+	}
+
+	private void verwalteMitglieder() {
+		try {
+			var mitglieder = mitgliederManager.getMitgliederDAO().findAll();
+
+			List<String> headers = Arrays.asList("MitgliedID", "Vorname", "Nachname", "Geburtsdatum", "Aktiv",
+					"Strasse", "Hausnr", "OrtID", "ZahlungsdatenID", "Telefon", "Mail");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>(headers.size());
+			for (String h : headers)
+				widths.add(h.length());
+
+			for (Mitglieder m : mitglieder) {
+				List<String> row = Arrays.asList(String.valueOf(m.getMitgliederID()),
+						m.getVorname() != null ? m.getVorname() : "-", m.getNachname() != null ? m.getNachname() : "-",
+						m.getGeburtsdatum() != null ? m.getGeburtsdatum().toString() : "-", String.valueOf(m.isAktiv()),
+						m.getStrasse() != null ? m.getStrasse() : "-", m.getHausnr() != null ? m.getHausnr() : "-",
+						String.valueOf(m.getOrtID()), String.valueOf(m.getZahlungsdatenID()),
+						m.getTelefon() != null ? m.getTelefon() : "-", m.getMail() != null ? m.getMail() : "-");
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
+			}
+
+			System.out.println("==== Mitglieder ====");
+			Formater.printTabelle(widths, headers, rows);
+		} catch (Exception e) {
+			System.out.println("Fehler beim Laden der Mitglieder: " + e.getMessage());
+		}
+		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
+	}
+
+	private void verwalteMitarbeiter() {
+		try {
+			var mitarbeiter = mitarbeiterManager.getMitarbeiterDAO().findAll();
+			List<String> headers = Arrays.asList("MitarbeiterID", "Vorname", "Nachname", "Geburtsdatum", "Aktiv",
+					"Strasse", "Hausnr", "OrtID", "ZahlungsdatenID", "Telefon", "Mail");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>(headers.size());
+			for (String h : headers)
+				widths.add(h.length());
+
+			for (Mitarbeiter m : mitarbeiter) {
+				List<String> row = Arrays.asList(String.valueOf(m.getMitarbeiterID()),
+						m.getVorname() != null ? m.getVorname() : "-", m.getNachname() != null ? m.getNachname() : "-",
+						m.getGeburtsdatum() != null ? m.getGeburtsdatum().toString() : "-", String.valueOf(m.isAktiv()),
+						m.getStraße() != null ? m.getStraße() : "-", m.getHausnr() != null ? m.getHausnr() : "-",
+						m.getOrt() != null ? String.valueOf(m.getOrt().getOrtID()) : "-",
+						m.getZahlungsdaten() != null ? String.valueOf(m.getZahlungsdaten().getZahlungsdatenID()) : "-",
+						m.getTelefon() != null ? m.getTelefon() : "-", m.getMail() != null ? m.getMail() : "-");
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
+			}
+
+			System.out.println("==== Mitarbeiter ====");
+			Formater.printTabelle(widths, headers, rows);
+		} catch (Exception e) {
+			System.out.println("Fehler beim Laden der Mitarbeiter: " + e.getMessage());
 		}
 		System.out.println("1 Einfügen | 2 Ändern | 3 Löschen | 4 Zurück");
 	}
@@ -843,21 +760,23 @@ public class AdminService extends BaseService {
 	private void verwalteRolle() {
 		try {
 			var rollen = mitarbeiterManager.getRolleDAO().findAll();
-			int maxId = "RolleID".length();
-			int maxName = "Bezeichnung".length();
-
+			List<String> headers = Arrays.asList("RolleID", "Bezeichnung", "Kommentar");
+			List<List<String>> rows = new ArrayList<>();
+			List<Integer> widths = new ArrayList<>();
+			for (String header : headers)
+				widths.add(header.length());
 			for (Rolle r : rollen) {
-				maxId = Math.max(maxId, String.valueOf(r.getRolleID()).length());
-				maxName = Math.max(maxName, r.getBezeichnung() != null ? r.getBezeichnung().length() : 0);
+			    List<String> row = Arrays.asList(
+			        Formater.printID(r.getRolleID(), 5),
+			        r.getBezeichnung() != null ? r.getBezeichnung() : "-",
+			        r.getKommentar() != null ? r.getKommentar() : "-"
+			    );
+				for (int i = 0; i < headers.size(); i++)
+					widths.set(i, Math.max(widths.get(i), row.get(i).length()));
+				rows.add(row);
 			}
-
-			String format = "%-" + maxId + "s | %-" + maxName + "s%n";
 			System.out.println("==== Rollen ====");
-			System.out.printf(format, "RolleID", "Bezeichnung");
-			System.out.println("-".repeat(maxId + maxName + 3));
-			for (Rolle r : rollen) {
-				System.out.printf(format, r.getRolleID(), r.getBezeichnung());
-			}
+			Formater.printTabelle(widths, headers, rows);
 		} catch (Exception e) {
 			System.out.println("Fehler beim Laden der Rollen: " + e.getMessage());
 		}

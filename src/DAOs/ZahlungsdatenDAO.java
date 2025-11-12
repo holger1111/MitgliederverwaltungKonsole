@@ -1,13 +1,13 @@
 package DAOs;
 
 import Objekte.Zahlungsdaten;
-import Validator.StringValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import Exception.PaymentDetailsException;
 import Exception.StringException;
+import OUTDATED.OUT_StringValidator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,7 +18,7 @@ import java.sql.Statement;
 public class ZahlungsdatenDAO extends BaseDAO<Zahlungsdaten> {
 
 	// Attribute
-	private final StringValidator stringValidator = new StringValidator();
+	private final OUT_StringValidator oUT_StringValidator = new OUT_StringValidator();
 
 	// Konstruktor
 	public ZahlungsdatenDAO(Connection connection) {
@@ -67,9 +67,9 @@ public class ZahlungsdatenDAO extends BaseDAO<Zahlungsdaten> {
 	 */
 	public int findOrCreateZahlungsdaten(String name, String iban, String bic)
 			throws SQLException, StringException, PaymentDetailsException {
-		stringValidator.validate(name);
-		stringValidator.validate(iban);
-		stringValidator.validate(bic);
+		oUT_StringValidator.validate(name);
+		oUT_StringValidator.validate(iban);
+		oUT_StringValidator.validate(bic);
 
 		// Plausibilitäts-Checks gegen TEST/Platzhalter
 		if (name.trim().isEmpty() || iban.trim().isEmpty() || bic.trim().isEmpty()
@@ -159,9 +159,9 @@ public class ZahlungsdatenDAO extends BaseDAO<Zahlungsdaten> {
 	// Override
 	@Override
 	public void insert(Zahlungsdaten entity) throws SQLException, StringException, PaymentDetailsException {
-		stringValidator.validate(entity.getName());
-		stringValidator.validate(entity.getIBAN());
-		stringValidator.validate(entity.getBIC());
+		oUT_StringValidator.validate(entity.getName());
+		oUT_StringValidator.validate(entity.getIBAN());
+		oUT_StringValidator.validate(entity.getBIC());
 
 		String sql = "INSERT INTO Zahlungsdaten (Name, IBAN, BIC) VALUES (?, ?, ?)";
 		PreparedStatement ps = null;
@@ -183,9 +183,9 @@ public class ZahlungsdatenDAO extends BaseDAO<Zahlungsdaten> {
 	// Override
 	@Override
 	public void update(Zahlungsdaten entity) throws SQLException, StringException, PaymentDetailsException {
-		stringValidator.validate(entity.getName());
-		stringValidator.validate(entity.getIBAN());
-		stringValidator.validate(entity.getBIC());
+		oUT_StringValidator.validate(entity.getName());
+		oUT_StringValidator.validate(entity.getIBAN());
+		oUT_StringValidator.validate(entity.getBIC());
 
 		String sql = "UPDATE Zahlungsdaten SET Name = ?, IBAN = ?, BIC = ? WHERE ZahlungsdatenID = ?";
 		PreparedStatement ps = null;

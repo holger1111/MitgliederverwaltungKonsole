@@ -1,8 +1,6 @@
 package DAOs;
 
 import Objekte.Ort;
-import Validator.IntValidator;
-import Validator.StringValidator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,12 +14,14 @@ import Exception.IntException;
 import Exception.StringException;
 import Exception.TooLongException;
 import Exception.TooShortException;
+import OUTDATED.OUT_IntValidator;
+import OUTDATED.OUT_StringValidator;
 
 public class OrtDAO extends BaseDAO<Ort> {
 
     // Attribute
-    private final IntValidator intValidator = new IntValidator();
-    private final StringValidator stringValidator = new StringValidator();
+    private final OUT_IntValidator oUT_IntValidator = new OUT_IntValidator();
+    private final OUT_StringValidator oUT_StringValidator = new OUT_StringValidator();
 
     // Konstruktor
     public OrtDAO(Connection connection) {
@@ -50,14 +50,6 @@ public class OrtDAO extends BaseDAO<Ort> {
         return ort.getOrtID();
     }
     
-    private Ort mapRowToOrt(ResultSet rs) throws SQLException {
-    	Ort ort = new Ort();
-    	ort.setOrtID(rs.getInt("OrtID"));
-    	ort.setPLZ(rs.getString("PLZ"));
-    	ort.setOrt(rs.getString("Ort"));
-        return ort;
-    }
-    
     /**
      * Findet eine OrtID nach PLZ und Name oder legt den Ort an, falls nicht vorhanden.
      * Gibt immer die passende OrtID zurück (neu oder vorhanden).
@@ -66,9 +58,9 @@ public class OrtDAO extends BaseDAO<Ort> {
             throws SQLException, StringException, TooShortException, TooLongException {
         
         // Validierung
-        stringValidator.validate(plz);
-        stringValidator.checkLength(plz, "PLZ", 5, 5);
-        stringValidator.validate(ort);
+        oUT_StringValidator.validate(plz);
+        oUT_StringValidator.checkLength(plz, "PLZ", 5, 5);
+        oUT_StringValidator.validate(ort);
         
         // Suche nach existierendem Ort
         String selectSQL = "SELECT OrtID, PLZ, Ort FROM Ort WHERE PLZ = ? AND Ort = ?";
@@ -108,7 +100,7 @@ public class OrtDAO extends BaseDAO<Ort> {
     @Override
     public Ort findById(int id) throws SQLException, IntException {
         try {
-            intValidator.validate(id);
+            oUT_IntValidator.validate(id);
         } catch (Exception e) {
             throw new IntException("Fehler bei der OrtID-Validierung: " + e.getMessage());
         }
@@ -163,14 +155,14 @@ public class OrtDAO extends BaseDAO<Ort> {
     public void insert(Ort entity)
             throws SQLException, StringException, TooShortException, TooLongException, IntException {
         try {
-            intValidator.validate(entity.getOrtID());
+            oUT_IntValidator.validate(entity.getOrtID());
         } catch (Exception e) {
             throw new IntException("Fehler bei OrtID: " + e.getMessage());
         }
         try {
-            stringValidator.validate(entity.getPLZ());
-            stringValidator.checkLength(entity.getPLZ(), "PLZ", 5, 5);
-            stringValidator.validate(entity.getOrt());
+            oUT_StringValidator.validate(entity.getPLZ());
+            oUT_StringValidator.checkLength(entity.getPLZ(), "PLZ", 5, 5);
+            oUT_StringValidator.validate(entity.getOrt());
         } catch (TooShortException | TooLongException | StringException ex) {
             throw ex;
         }
@@ -193,10 +185,10 @@ public class OrtDAO extends BaseDAO<Ort> {
     public void update(Ort entity)
             throws SQLException, StringException, TooShortException, TooLongException, IntException {
         try {
-            intValidator.validate(entity.getOrtID());
-            stringValidator.validate(entity.getPLZ());
-            stringValidator.checkLength(entity.getPLZ(), "PLZ", 5, 5);
-            stringValidator.validate(entity.getOrt());
+            oUT_IntValidator.validate(entity.getOrtID());
+            oUT_StringValidator.validate(entity.getPLZ());
+            oUT_StringValidator.checkLength(entity.getPLZ(), "PLZ", 5, 5);
+            oUT_StringValidator.validate(entity.getOrt());
         } catch (TooShortException | TooLongException | StringException | IntException ex) {
             throw ex;
         }
@@ -218,7 +210,7 @@ public class OrtDAO extends BaseDAO<Ort> {
     @Override
     public void delete(int id) throws SQLException, IntException {
         try {
-            intValidator.validate(id);
+            oUT_IntValidator.validate(id);
         } catch (Exception e) {
             throw new IntException("Fehler bei OrtID: " + e.getMessage());
         }

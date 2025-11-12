@@ -2,7 +2,6 @@ package DAOs;
 
 import Objekte.Interessenten;
 import Objekte.Mitglieder;
-import Validator.StringValidator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,11 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Exception.StringException;
+import OUTDATED.OUT_StringValidator;
 
 public class InteressentenDAO extends BaseDAO<Interessenten> {
 
     // Attribute
-    private final StringValidator stringValidator = new StringValidator();
+    private final OUT_StringValidator oUT_StringValidator = new OUT_StringValidator();
 
     // Konstruktor
     public InteressentenDAO(Connection connection) {
@@ -61,9 +61,9 @@ public class InteressentenDAO extends BaseDAO<Interessenten> {
      */
     public int findOrCreateInteressent(String vorname, String nachname, String telefon)
             throws SQLException, StringException {
-        stringValidator.validate(vorname);
-        stringValidator.validate(nachname);
-        stringValidator.validate(telefon);
+        oUT_StringValidator.validate(vorname);
+        oUT_StringValidator.validate(nachname);
+        oUT_StringValidator.validate(telefon);
 
         String selectSQL = "SELECT MitgliederID FROM Mitglieder WHERE Vorname = ? AND Nachname = ? AND Telefon = ?";
         PreparedStatement ps = null;
