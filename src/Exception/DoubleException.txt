@@ -1,6 +1,6 @@
 package Exception;
 
-public class DoubleException extends BasicTypeException {
+public class DoubleException extends NumericException {
     private static final long serialVersionUID = 1L;
 
     public DoubleException() {

@@ -1,6 +1,7 @@
 package Validator;
 
 import Exception.StringException;
+import OUTDATED.OUT_CharException;
 import Exception.IntException;
 import Exception.LongException;
 import Exception.ShortException;
@@ -9,7 +10,6 @@ import Exception.BigDecimalException;
 import Exception.BigIntegerException;
 import Exception.BooleanException;
 import Exception.ByteException;
-import Exception.CharException;
 import Exception.DataIsNullException;
 import Exception.DoubleException;
 import Exception.FloatException;
@@ -104,9 +104,9 @@ public class BasicTypeValidator extends BaseValidator<Object> {
         }
     }
 
-    public static void validateCharacter(Object obj) throws CharException  {
+    public static void validateCharacter(Object obj) throws OUT_CharException  {
         if (!(obj instanceof Character)) {
-            throw new CharException ("Eingabe ist kein Character.");
+            throw new OUT_CharException ("Eingabe ist kein Character.");
         }
     }
 

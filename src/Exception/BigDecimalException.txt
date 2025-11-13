@@ -1,21 +1,21 @@
 package Exception;
 
-public class BigDecimalException extends BasicTypeException {
-	private static final long serialVersionUID = 1L;
+public class BigDecimalException extends NumericException {
+    private static final long serialVersionUID = 1L;
 
-	public BigDecimalException() {
-		super();
-	}
+    public BigDecimalException() {
+        super();
+    }
 
-	public BigDecimalException(String message) {
-		super(message);
-	}
+    public BigDecimalException(String message) {
+        super(message);
+    }
 
-	public BigDecimalException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public BigDecimalException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public BigDecimalException(Throwable cause) {
-		super(cause);
-	}
+    public BigDecimalException(Throwable cause) {
+        super(cause);
+    }
 }

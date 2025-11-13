@@ -2,6 +2,7 @@ package Exception;
 
 public class ValueNotFoundException extends NotFoundException {
     private static final long serialVersionUID = 1L;
+
     public ValueNotFoundException() {
         super();
     }
@@ -12,5 +13,9 @@ public class ValueNotFoundException extends NotFoundException {
 
     public ValueNotFoundException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public ValueNotFoundException(Throwable cause) {
+        super(cause);
     }
 }

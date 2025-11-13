@@ -1,21 +1,21 @@
 package Exception;
 
-public class ByteException extends BasicTypeException {
-	private static final long serialVersionUID = 1L;
+public class ByteException extends NumericException {
+    private static final long serialVersionUID = 1L;
 
-	public ByteException() {
-		super();
-	}
+    public ByteException() {
+        super();
+    }
 
-	public ByteException(String message) {
-		super(message);
-	}
+    public ByteException(String message) {
+        super(message);
+    }
 
-	public ByteException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public ByteException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public ByteException(Throwable cause) {
-		super(cause);
-	}
+    public ByteException(Throwable cause) {
+        super(cause);
+    }
 }
