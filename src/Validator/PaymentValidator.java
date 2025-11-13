@@ -1,41 +1,32 @@
 package Validator;
 
-import Exception.PayException;
+import Exception.StringException;
 import Exception.PaymentDetailsException;
-import Objekte.Mitglieder;
-import Objekte.MitgliederVertrag;
-import Objekte.Zahlung;
-import Objekte.Zahlungsdaten;
 
-public class PaymentValidator extends BaseValidator<MitgliederVertrag> {
+import java.util.Arrays;
+import java.util.List;
 
-    private Zahlung zahlung;
-    private Mitglieder mitglied;
+public class PaymentValidator extends StringValidator {
 
-    public PaymentValidator(Zahlung zahlung, Mitglieder mitglied) {
-        this.zahlung = zahlung;
-        this.mitglied = mitglied;
-    }
+    public static final String UEBERWEISUNG = "Überweisung";
+    public static final String SEPA_LASTSCHRIFT = "SEPA-Lastschrift";
+
+    private static final List<String> PAYMENT_TYPES =
+            Arrays.asList(UEBERWEISUNG, SEPA_LASTSCHRIFT);
 
     @Override
-    public void validate(MitgliederVertrag mv) throws Exception {
-        // Prüfe Zahlungsart "Abbuchung" ODER "SEPA-Lastschrift"
-        String zahlungsart = zahlung.getZahlungsart();
-        if (zahlungsart == null || 
-            (!zahlungsart.equalsIgnoreCase("Überweisung") && 
-             !zahlungsart.equalsIgnoreCase("SEPA-Lastschrift"))) {
-            String msg = "Zahlungsart muss 'Überweisung' oder 'SEPA-Lastschrift' sein, ist aber '" + zahlungsart + "'";
+    public void validate(String obj) throws StringException, PaymentDetailsException {
+        errors.clear();
+
+        if (obj == null || obj.trim().isEmpty()) {
+            String msg = "Zahlungsart darf nicht leer sein.";
             errors.add(msg);
-            throw new PayException(msg);
+            throw new StringException(msg);
         }
 
-        // Prüfe Zahlungsdaten
-        Zahlungsdaten zahlungsdaten = mitglied.getZahlungsdaten();
-        if (zahlungsdaten == null
-                || zahlungsdaten.getName() == null || zahlungsdaten.getName().trim().isEmpty()
-                || zahlungsdaten.getIBAN() == null || zahlungsdaten.getIBAN().trim().isEmpty()
-                || zahlungsdaten.getBIC() == null || zahlungsdaten.getBIC().trim().isEmpty()) {
-            String msg = "Zahlungsdaten unvollständig für Mitglied (" + mitglied.getMitgliederID() + ")";
+        String paymentType = obj.trim();
+        if (!PAYMENT_TYPES.contains(paymentType)) {
+            String msg = "Ungültige Zahlungsart. Erlaubt sind: \"Überweisung\" oder \"SEPA-Lastschrift\".";
             errors.add(msg);
             throw new PaymentDetailsException(msg);
         }

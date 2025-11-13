@@ -1,0 +1,16 @@
+package Validator;
+
+import Exception.DataIsNullException;
+
+public class NotNullValidator<T> extends BaseValidator<T> {
+
+    @Override
+    public void validate(T obj) throws DataIsNullException {
+        errors.clear();
+        if (obj == null) {
+            String msg = "Eingabe darf nicht null sein.";
+            errors.add(msg);
+            throw new DataIsNullException(msg);
+        }
+    }
+}

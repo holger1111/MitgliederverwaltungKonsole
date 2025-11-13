@@ -1,0 +1,19 @@
+package Validator;
+
+import Exception.IntException;
+
+public class IntValidator {
+
+    public void validateObject(Object obj) throws IntException {
+        if (!(obj instanceof Integer)) {
+            throw new IntException("Eingabe ist keine ganze Zahl.");
+        }
+    }
+
+    // Alternativ eine statische Methode zu Validierung
+    public static void validateInt(Object obj) throws IntException {
+        if (!(obj instanceof Integer)) {
+            throw new IntException("Eingabe ist keine ganze Zahl.");
+        }
+    }
+}

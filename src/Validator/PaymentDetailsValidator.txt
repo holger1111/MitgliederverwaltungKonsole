@@ -2,11 +2,12 @@ package Validator;
 
 import Exception.PaymentDetailsException;
 import Exception.StringException;
+import OUTDATED.OUT_BasicTypeValidator;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class PaymentDetailsValidator extends BasicTypeValidator {
+public class PaymentDetailsValidator extends OUT_BasicTypeValidator {
 
     private static final String IBAN_REGEX = "^[A-Z]{2}[0-9A-Z]{13,32}$";
     private static final Pattern IBAN_PATTERN = Pattern.compile(IBAN_REGEX);

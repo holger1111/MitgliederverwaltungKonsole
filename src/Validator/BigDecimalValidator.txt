@@ -1,0 +1,17 @@
+package Validator;
+
+import java.math.BigDecimal;
+
+import Exception.BigDecimalException;
+
+public class BigDecimalValidator {
+
+    public void validate(BigDecimal value) throws BigDecimalException {
+        if (value == null) {
+            throw new BigDecimalException("BigDecimal-Wert darf nicht null sein.");
+        }
+        if (value.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BigDecimalException("BigDecimal-Wert darf nicht negativ sein.");
+        }
+    }
+}

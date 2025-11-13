@@ -4,8 +4,8 @@ import java.util.Scanner;
 import java.math.BigInteger;
 import java.math.BigDecimal;
 
-import Validator.BasicTypeValidator;
 import Exception.*;
+import OUTDATED.OUT_BasicTypeValidator;
 
 public class IO {
 
@@ -16,7 +16,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         int value = Integer.parseInt(input);
-        BasicTypeValidator.validateInt(value);
+        OUT_BasicTypeValidator.validateInt(value);
         return value;
     }
 
@@ -25,7 +25,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         double value = Double.parseDouble(input);
-        BasicTypeValidator.validateDouble(value);
+        OUT_BasicTypeValidator.validateDouble(value);
         return value;
     }
 
@@ -33,7 +33,7 @@ public class IO {
         System.out.println(prompt);
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
-        BasicTypeValidator.validateString(input);
+        OUT_BasicTypeValidator.validateString(input);
         return input;
     }
 
@@ -42,7 +42,7 @@ public class IO {
         String line = scanner.nextLine();
         String clean = StripEntry.clean(line);
         char value = clean.isEmpty() ? '\0' : clean.charAt(0);
-        BasicTypeValidator.validateCharacter(value);
+        OUT_BasicTypeValidator.validateCharacter(value);
         return value;
     }
 
@@ -51,7 +51,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         byte value = Byte.parseByte(input);
-        BasicTypeValidator.validateByte(value);
+        OUT_BasicTypeValidator.validateByte(value);
         return value;
     }
 
@@ -60,7 +60,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         short value = Short.parseShort(input);
-        BasicTypeValidator.validateShort(value);
+        OUT_BasicTypeValidator.validateShort(value);
         return value;
     }
 
@@ -69,7 +69,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         long value = Long.parseLong(input);
-        BasicTypeValidator.validateLong(value);
+        OUT_BasicTypeValidator.validateLong(value);
         return value;
     }
 
@@ -78,7 +78,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         float value = Float.parseFloat(input);
-        BasicTypeValidator.validateFloat(value);
+        OUT_BasicTypeValidator.validateFloat(value);
         return value;
     }
 
@@ -87,7 +87,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         boolean value = Boolean.parseBoolean(input);
-        BasicTypeValidator.validateBoolean(value);
+        OUT_BasicTypeValidator.validateBoolean(value);
         return value;
     }
 
@@ -95,7 +95,7 @@ public class IO {
         System.out.println(prompt);
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
-        BasicTypeValidator.validateString(input);
+        OUT_BasicTypeValidator.validateString(input);
         return input;
     }
 
@@ -103,7 +103,7 @@ public class IO {
         System.out.println(prompt);
         String input = scanner.next();
         input = StripEntry.clean(input);
-        BasicTypeValidator.validateString(input);
+        OUT_BasicTypeValidator.validateString(input);
         return input;
     }
 
@@ -112,7 +112,7 @@ public class IO {
         String input = scanner.nextLine();
         input = StripEntry.clean(input);
         BigInteger value = new BigInteger(input);
-        BasicTypeValidator.validateBigInteger(value);
+        OUT_BasicTypeValidator.validateBigInteger(value);
         return value;
     }
 
@@ -122,7 +122,7 @@ public class IO {
         input = StripEntry.clean(input);
         input = input.replace(",", ".");
         BigDecimal value = new BigDecimal(input);
-        BasicTypeValidator.validateBigDecimal(value);
+        OUT_BasicTypeValidator.validateBigDecimal(value);
         return value;
     }
 }

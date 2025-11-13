@@ -1,8 +1,9 @@
 package Validator;
 
 import Exception.CurrencyException;
+import OUTDATED.OUT_BasicTypeValidator;
 
-public class CurrencyValidator extends BasicTypeValidator {
+public class CurrencyValidator extends OUT_BasicTypeValidator {
 
     private double result;
 

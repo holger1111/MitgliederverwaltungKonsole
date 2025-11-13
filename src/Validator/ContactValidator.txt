@@ -3,12 +3,13 @@ package Validator;
 import Exception.StringException;
 import Exception.MailException;
 import Exception.TelefonException;
+import OUTDATED.OUT_BasicTypeValidator;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.*;
 
-public class ContactValidator extends BasicTypeValidator {
+public class ContactValidator extends OUT_BasicTypeValidator {
 
 	// Regex für E-Mail
 	private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";

@@ -1,0 +1,15 @@
+package Validator;
+
+import Exception.LongException;
+
+public class LongValidator {
+
+    public void validate(Long value) throws LongException {
+        if (value == null) {
+            throw new LongException("Long-Wert darf nicht null sein.");
+        }
+        if (value < Long.MIN_VALUE || value > Long.MAX_VALUE) {
+            throw new LongException("Long-Wert liegt außerhalb des gültigen Bereichs.");
+        }
+    }
+}

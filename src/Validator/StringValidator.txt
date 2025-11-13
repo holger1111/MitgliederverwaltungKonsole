@@ -1,0 +1,21 @@
+package Validator;
+
+import Exception.StringException;
+
+public class StringValidator extends BaseValidator<String> {
+
+    @Override
+    public void validate(String value) throws StringException {
+        errors.clear();
+        if (value == null || value.trim().isEmpty()) {
+            String msg = "Der String darf nicht null oder leer sein.";
+            errors.add(msg);
+            throw new StringException(msg);
+        }
+        if (value.length() > 255) {
+            String msg = "Der String ist zu lang (maximal 255 Zeichen).";
+            errors.add(msg);
+            throw new StringException(msg);
+        }
+    }
+}
