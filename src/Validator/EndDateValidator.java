@@ -2,14 +2,17 @@ package Validator;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 
+import Exception.DateException;
 import Exception.EndDateException;
 import Objekte.MitgliederVertrag;
 
 /**
  * Validiert das Vertragsende anhand des Vertragsbeginns und der Laufzeit (Wochen).
+ * Nutzt DateValidator als Basisklasse und prüft auch das Datumsformat.
  */
-public class EndDateValidator extends BaseValidator<MitgliederVertrag, EndDateException> {
+public class EndDateValidator extends DateValidator<MitgliederVertrag, EndDateException> {
 
     private int laufzeitWochen = 0;
 
@@ -35,6 +38,17 @@ public class EndDateValidator extends BaseValidator<MitgliederVertrag, EndDateEx
             errors.add(msg);
             throw new EndDateException(msg);
         }
+
+        // Formatvalidierung des Vertragsbeginns
+        String beginnStr = new SimpleDateFormat("dd.MM.yyyy").format(mv.getVertragsbeginn());
+        try {
+            validateDateFormat(beginnStr); // Methode aus DateValidator
+        } catch (DateException ex) {
+            String msg = "Vertragsbeginn hat ungültiges Format: " + beginnStr;
+            errors.add(msg);
+            throw new EndDateException(msg);
+        }
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(mv.getVertragsbeginn());
         cal.add(Calendar.WEEK_OF_YEAR, laufzeitWochen);

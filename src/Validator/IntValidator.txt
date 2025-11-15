@@ -2,18 +2,22 @@ package Validator;
 
 import Exception.IntException;
 
-public class IntValidator {
+/**
+ * Validator für Integer-Werte.
+ */
+public class IntValidator extends NumericValidator<Integer, IntException> {
 
-    public void validateObject(Object obj) throws IntException {
-        if (!(obj instanceof Integer)) {
-            throw new IntException("Eingabe ist keine ganze Zahl.");
-        }
+    public IntValidator() {
+        super();
     }
 
-    // Alternativ eine statische Methode zu Validierung
-    public static void validateInt(Object obj) throws IntException {
-        if (!(obj instanceof Integer)) {
-            throw new IntException("Eingabe ist keine ganze Zahl.");
+    @Override
+    public void validate(Integer obj) throws IntException {
+        errors.clear();
+        if (obj == null) {
+            String msg = "Integer-Wert darf nicht null sein.";
+            addError(msg);
+            throw new IntException(msg);
         }
     }
 }

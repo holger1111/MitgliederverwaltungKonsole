@@ -2,26 +2,17 @@ package Validator;
 
 import Exception.DateException;
 
-public class DateValidator extends BaseValidator<String> {
+/**
+ * Generischer abstrakter Validator für Datums-Prüfungen.
+ */
+public abstract class DateValidator<T, E extends Exception> extends BaseValidator<T, E> {
 
-	@Override
-	public void validate(String obj) throws DateException {
-		errors.clear();
-		if (obj == null) {
-			String msg = "Eingabe ist null.";
-			errors.add(msg);
-			throw new DateException(msg);
-		}
-		String dateStr = obj.trim();
-
-		// Überprüfen, ob das Format dd.mm.yyyy eingehalten wird (z.B. 2 Ziffern, Punkt,
-		// 2 Ziffern, Punkt, 4 Ziffern)
-		if (!dateStr.matches("^\\d{2}\\.\\d{2}\\.\\d{4}$")) {
-			String msg = "Datum muss im Format dd.mm.yyyy sein.";
-			errors.add(msg);
-			throw new DateException(msg);
-		}
-
-	}
-
+    /**
+     * Prüft ein Datums-String-Format (dd.MM.yyyy).
+     */
+    protected void validateDateFormat(String dateStr) throws DateException {
+        if (dateStr == null || !dateStr.matches("^\\d{2}\\.\\d{2}\\.\\d{4}$")) {
+            throw new DateException("Datum muss im Format dd.MM.yyyy sein.");
+        }
+    }
 }

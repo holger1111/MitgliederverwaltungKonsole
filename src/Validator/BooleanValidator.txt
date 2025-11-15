@@ -2,13 +2,18 @@ package Validator;
 
 import Exception.BooleanException;
 
-public class BooleanValidator extends BaseValidator<Boolean> {
+/**
+ * Validator für Boolean-Werte mit Basisklasse für zwei Generics.
+ */
+public class BooleanValidator extends BaseValidator<Boolean, BooleanException> {
 
     @Override
     public void validate(Boolean value) throws BooleanException {
         errors.clear();
         if (value == null) {
-            throw new BooleanException("Boolean-Wert darf nicht null sein.");
+            String msg = "Boolean-Wert darf nicht null sein.";
+            addError(msg);
+            throw new BooleanException(msg);
         }
     }
 }

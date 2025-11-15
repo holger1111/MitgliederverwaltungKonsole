@@ -5,124 +5,191 @@ import java.math.BigInteger;
 import java.math.BigDecimal;
 
 import Exception.*;
-import OUTDATED.OUT_BasicTypeValidator;
+import Validator.*;
 
 public class IO {
-
     private static final Scanner scanner = new Scanner(System.in);
 
-    public static int readInt(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        int value = Integer.parseInt(input);
-        OUT_BasicTypeValidator.validateInt(value);
-        return value;
+    public static int readInt(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                int value = Integer.parseInt(input);
+                IntValidator.validate(value);
+                return value;
+            } catch (IntException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine ganze Zahl eingeben.");
+            }
+        }
     }
 
-    public static double readDouble(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        double value = Double.parseDouble(input);
-        OUT_BasicTypeValidator.validateDouble(value);
-        return value;
+    public static double readDouble(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                double value = Double.parseDouble(input);
+                DoubleValidator.validate(value);
+                return value;
+            } catch (DoubleException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine Gleitkommazahl eingeben.");
+            }
+        }
     }
 
-    public static String readString(String prompt) throws StringException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        OUT_BasicTypeValidator.validateString(input);
-        return input;
+    public static String readString(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                StringValidator.validate(input);
+                return input;
+            } catch (StringException e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
-    public static char readChar(String prompt) throws StringException {
-        System.out.println(prompt);
-        String line = scanner.nextLine();
-        String clean = StripEntry.clean(line);
-        char value = clean.isEmpty() ? '\0' : clean.charAt(0);
-        OUT_BasicTypeValidator.validateCharacter(value);
-        return value;
+    public static char readChar(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String line = scanner.nextLine();
+                String clean = StripEntry.clean(line);
+                if (clean.isEmpty())
+                    throw new StringException("Keine Eingabe erhalten.");
+                char value = clean.charAt(0);
+                CharValidator.validate(value);
+                return value;
+            } catch (StringException e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
-    public static byte readByte(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        byte value = Byte.parseByte(input);
-        OUT_BasicTypeValidator.validateByte(value);
-        return value;
+    public static byte readByte(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                byte value = Byte.parseByte(input);
+                ByteValidator.validate(value);
+                return value;
+            } catch (ByteException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine Zahl im Byte-Bereich eingeben.");
+            }
+        }
     }
 
-    public static short readShort(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        short value = Short.parseShort(input);
-        OUT_BasicTypeValidator.validateShort(value);
-        return value;
+    public static short readShort(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                short value = Short.parseShort(input);
+                ShortValidator.validate(value);
+                return value;
+            } catch (ShortException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine kurze Zahl eingeben.");
+            }
+        }
     }
 
-    public static long readLong(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        long value = Long.parseLong(input);
-        OUT_BasicTypeValidator.validateLong(value);
-        return value;
+    public static long readLong(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                long value = Long.parseLong(input);
+                LongValidator.validate(value);
+                return value;
+            } catch (LongException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine lange Zahl eingeben.");
+            }
+        }
     }
 
-    public static float readFloat(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        float value = Float.parseFloat(input);
-        OUT_BasicTypeValidator.validateFloat(value);
-        return value;
+    public static float readFloat(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                float value = Float.parseFloat(input);
+                FloatValidator.validate(value);
+                return value;
+            } catch (FloatException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine Fließkommazahl eingeben.");
+            }
+        }
     }
 
-    public static boolean readBoolean(String prompt) throws BooleanException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        boolean value = Boolean.parseBoolean(input);
-        OUT_BasicTypeValidator.validateBoolean(value);
-        return value;
+    public static boolean readBoolean(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                boolean value = Boolean.parseBoolean(input);
+                BooleanValidator.validate(value);
+                return value;
+            } catch (BooleanException e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
-    public static String readLine(String prompt) throws StringException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        OUT_BasicTypeValidator.validateString(input);
-        return input;
+    public static BigInteger readBigInteger(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                BigInteger value = new BigInteger(input);
+                BigIntegerValidator.validate(value);
+                return value;
+            } catch (BigIntegerException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine ganze Zahl eingeben.");
+            }
+        }
     }
 
-    public static String readToken(String prompt) throws StringException {
-        System.out.println(prompt);
-        String input = scanner.next();
-        input = StripEntry.clean(input);
-        OUT_BasicTypeValidator.validateString(input);
-        return input;
-    }
-
-    public static BigInteger readBigInteger(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        BigInteger value = new BigInteger(input);
-        OUT_BasicTypeValidator.validateBigInteger(value);
-        return value;
-    }
-
-    public static BigDecimal readBigDecimal(String prompt) throws IntException {
-        System.out.println(prompt);
-        String input = scanner.nextLine();
-        input = StripEntry.clean(input);
-        input = input.replace(",", ".");
-        BigDecimal value = new BigDecimal(input);
-        OUT_BasicTypeValidator.validateBigDecimal(value);
-        return value;
+    public static BigDecimal readBigDecimal(String prompt) {
+        while (true) {
+            try {
+                System.out.println(prompt);
+                String input = scanner.nextLine();
+                input = StripEntry.clean(input);
+                input = input.replace(',', '.');
+                BigDecimal value = new BigDecimal(input);
+                BigDecimalValidator.validate(value);
+                return value;
+            } catch (BigDecimalException e) {
+                System.out.println(e.getMessage());
+            } catch (NumberFormatException e) {
+                System.out.println("Ungültige Eingabe, bitte eine Dezimalzahl eingeben.");
+            }
+        }
     }
 }

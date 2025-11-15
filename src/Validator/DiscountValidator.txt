@@ -1,27 +1,37 @@
 package Validator;
 
 import Exception.DiscountException;
-import Objekte.MitgliederVertrag;
-import Objekte.Vertrag;
 
-public class DiscountValidator extends BaseValidator<MitgliederVertrag> {
+public class DiscountValidator extends NumericValidator<Double, DiscountException> {
 
-    private Vertrag vertrag;
+    private final double basePrice;
 
-    public DiscountValidator(Vertrag vertrag) {
-        this.vertrag = vertrag;
+    public DiscountValidator(double basePrice) {
+        super();
+        this.basePrice = basePrice;
     }
 
     @Override
-    public void validate(MitgliederVertrag mv) throws DiscountException {
-        Double rabatt = mv.getPreisrabatt();
-        Double grundpreis = vertrag.getGrundpreis();
-        if (rabatt == null) rabatt = 0.0;
-//        if (grundpreis == null) grundpreis = 0.0;
-        if (rabatt > grundpreis) {
-            String msg = "Der Rabatt (" + rabatt + ") ist größer als der Grundpreis (" + grundpreis + ")!";
-            errors.add(msg);
+    public void validate(Double discount) throws DiscountException {
+        errors.clear();
+        if (discount == null) {
+            String msg = "Rabatt darf nicht null sein.";
+            addError(msg);
             throw new DiscountException(msg);
         }
+        if (discount < 0) {
+            String msg = "Rabatt darf nicht negativ sein.";
+            addError(msg);
+            throw new DiscountException(msg);
+        }
+        if (discount > basePrice) {
+            String msg = "Rabatt darf nicht größer als der Grundpreis (" + basePrice + ") sein.";
+            addError(msg);
+            throw new DiscountException(msg);
+        }
+    }
+
+    public double getBasePrice() {
+        return basePrice;
     }
 }
